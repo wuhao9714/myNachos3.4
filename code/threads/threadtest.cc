@@ -33,7 +33,7 @@ SimpleThread(int which)
     
     for (num = 0; num < which; num++) {
 	// printf("*** thread %d looped %d times\n", which, num);
-        printf("*** thread name %s userid %d threadid %d looped %d times \n",
+        printf("*** thread name:%s userid:%d threadid:%d looped:%d times \n",
             currentThread->getName(),currentThread->getUserID(),currentThread->getThreadID(),num);
         currentThread->Yield();
     }
