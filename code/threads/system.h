@@ -19,6 +19,8 @@
 //PKU OS LAB1.3	
 #define MaxThread 128
 extern int threadIDs[MaxThread];
+extern int allocatedThreadID();
+extern int currentThreadNum();
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
 						// called before anything else

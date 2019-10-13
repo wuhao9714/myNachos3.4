@@ -336,18 +336,3 @@ Thread::getThreadID()
     return threadID;
 }
 
-int
-allocatedThreadID()
-{
-    int i;
-    for(i=0;i<MaxThread;i++){
-        if(threadIDs[i]==0){
-            break;
-        }
-    }if(i<MaxThread){
-        threadIDs[i]=1;
-        return i;
-    }else{
-        return -1;
-    }
-}

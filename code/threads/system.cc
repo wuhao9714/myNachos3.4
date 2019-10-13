@@ -38,8 +38,34 @@ PostOffice *postOffice;
 
 // External definition, to allow us to take a pointer to this function
 extern void Cleanup();
+
 int threadIDs[MaxThread];
 
+int
+allocatedThreadID()
+{
+    int i;
+    for(i=0;i<MaxThread;i++){
+        if(threadIDs[i]==0){
+            break;
+        }
+    }if(i<MaxThread){
+        threadIDs[i]=1;
+        return i;
+    }else{
+        return -1;
+    }
+}
+
+int
+currentThreadNum(){
+    int num=0;
+    for(i=0;i<MaxThread;i++){
+        if(threadIDs[i]==1)
+            num++;
+    }
+    return num;
+}
 //----------------------------------------------------------------------
 // TimerInterruptHandler
 // 	Interrupt handler for the timer device.  The timer device is
