@@ -28,12 +28,13 @@ int testnum = 1;
 void
 SimpleThread(int which)
 {
+    //which 此处代表loop次数
     int num;
     
-    for (num = 0; num < 5; num++) {
+    for (num = 0; num < which; num++) {
 	// printf("*** thread %d looped %d times\n", which, num);
         printf("*** thread name %s userid %d threadid %d looped %d times \n",
-            currentThread->getName(),currentThread->getUserID(),currentThread->getUserID(),num);
+            currentThread->getName(),currentThread->getUserID(),currentThread->getThreadID(),num);
         currentThread->Yield();
     }
 }
@@ -59,16 +60,14 @@ ThreadTest1()
 {
     DEBUG('t', "Entering ThreadTest1");
 
-    Thread *t1 = new Thread("forked thread");
-    Thread *t2 = new Thread("forked thread");
-    Thread *t3 = new Thread("forked thread");
-    Thread *t4 = new Thread("forked thread");
+    Thread *t1 = new Thread("forked thread1");
+    Thread *t2 = new Thread("forked thread2");
+  
 
-    t1->Fork(SimpleThread, t1->getThreadID());
-    t2->Fork(SimpleThread, t2->getThreadID());
-    t3->Fork(SimpleThread, t3->getThreadID());
-    t4->Fork(SimpleThread, t4->getThreadID());
-    SimpleThread(0);
+    t1->Fork(SimpleThread, (void*)5);
+    t2->Fork(SimpleThread, (void*)5);
+
+    SimpleThread(5);
 }
 
 //----------------------------------------------------------------------
