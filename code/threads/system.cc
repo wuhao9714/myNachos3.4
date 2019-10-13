@@ -40,7 +40,7 @@ PostOffice *postOffice;
 extern void Cleanup();
 
 int threadIDs[MaxThread];
-
+Thread *threadPointers[MaxThread];
 int
 allocatedThreadID()
 {
@@ -60,11 +60,20 @@ allocatedThreadID()
 int
 currentThreadNum(){
     int num=0;
-    for(i=0;i<MaxThread;i++){
+    for(int i=0;i<MaxThread;i++){
         if(threadIDs[i]==1)
             num++;
     }
     return num;
+}
+
+void 
+allThreadInfo(){
+    for(int i=0;i<MaxThread;i++){
+        if(threadPointers[i]!=NULL){
+            threadPointers[i]->printThreadInfo();
+        }
+    }
 }
 //----------------------------------------------------------------------
 // TimerInterruptHandler
@@ -108,6 +117,7 @@ Initialize(int argc, char **argv)
     bool randomYield = FALSE;
     for(int i=0;i<MaxThread;i++){
         threadIDs[i]=0;
+        threadPointers[i]=NULL;
     }
 #ifdef USER_PROGRAM
     bool debugUserProg = FALSE;	// single step user program

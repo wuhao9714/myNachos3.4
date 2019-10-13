@@ -24,7 +24,7 @@
 #define STACK_FENCEPOST 0xdeadbeef	// this is put at the top of the
 					// execution stack, for detecting 
 					// stack overflows
-
+char* ThreadStatusInChar[]={"JUST_CREATED","RUNNING","READY","BLOCKED"};
 //----------------------------------------------------------------------
 // Thread::Thread
 // 	Initialize a thread control block, so that we can then call
@@ -44,6 +44,7 @@ Thread::Thread(char* threadName)
 #endif
     userID=getuid();
     threadID=allocatedThreadID();
+    threadPointers[threadID]=this;
 }
 
 //----------------------------------------------------------------------
@@ -66,6 +67,7 @@ Thread::~Thread()
     if (stack != NULL)
 	DeallocBoundedArray((char *) stack, StackSize * sizeof(int));
     threadIDs[threadID]=0;
+    threadPointers[threadID]=NULL;
 }
 
 //----------------------------------------------------------------------
@@ -323,16 +325,8 @@ Thread::RestoreUserState()
 }
 #endif
 
-
-int
-Thread::getUserID()
-{
-    return userID;
+void
+Thread::printThreadInfo(){
+    printf("ThreadID:%d ThreadName:%s UserID:%d Status:%s\n",
+        getThreadID(),getName(),getUserID(),getStatus());
 }
-
-int
-Thread::getThreadID()
-{
-    return threadID;
-}
-

@@ -25,6 +25,9 @@ int testnum = 1;
 //	purposes.
 //----------------------------------------------------------------------
 
+void 
+doNothing(int which){}
+
 void
 SimpleThread(int which)
 {
@@ -55,11 +58,12 @@ SimpleThread(int which)
 //     t->Fork(SimpleThread, (void*)1);
 //     SimpleThread(0);
 // }
+
+
 void
 ThreadTest1()
 {
     DEBUG('t', "Entering ThreadTest1");
-
 
     Thread *t1 = new Thread("forked thread1");
     Thread *t2 = new Thread("forked thread2");
@@ -69,6 +73,40 @@ ThreadTest1()
     t2->Fork(SimpleThread, (void*)5);
 
     SimpleThread(5);
+}
+
+void
+ThreadTest2()
+{
+    DEBUG('t', "Entering ThreadTest1");
+
+    printf("*** \"main\" thread userid:%d threadid:%d \n",
+            currentThread->getUserID(),currentThread->getThreadID());
+
+    int testThreadNum = 130;
+    for(int i=0;i<testThreadNum;i++){
+        if(currentThreadNum()<MaxThread){
+            Thread *t = new Thread("forked");
+            t->Fork(doNothing, (void*)0);
+            printf("*** successfully create thread userid:%d threadid:%d \n",
+            t->getUserID(),t->getThreadID());
+        }
+        else{
+            printf("The current number of processes has reached the maximum, and the process ID cannot be assigned\n");
+        }
+    }
+
+}
+
+void
+ThreadTest3(){
+    printf("this is information at the beginning of ThreadTest1:\n\n");
+    allThreadInfo();
+    printf("\n");
+    ThreadTest1();
+    printf("\nthis is information at the ending of ThreadTest1:\n\n");
+    allThreadInfo();
+    printf("\n");
 }
 
 //----------------------------------------------------------------------
@@ -83,6 +121,12 @@ ThreadTest()
     case 1:
 	ThreadTest1();
 	break;
+    case 2:
+    ThreadTest2();
+    break;
+    case 3:
+    ThreadTest3();
+    break;
     default:
 	printf("No test specified.\n");
 	break;

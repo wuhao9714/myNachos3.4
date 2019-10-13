@@ -57,8 +57,9 @@
 
 
 // Thread state
-enum ThreadStatus { JUST_CREATED, RUNNING, READY, BLOCKED };
 
+enum ThreadStatus { JUST_CREATED, RUNNING, READY, BLOCKED };
+extern char *ThreadStatusInChar[];
 // external function, dummy routine whose sole job is to call Thread::Print
 extern void ThreadPrint(int arg);	 
 
@@ -102,8 +103,10 @@ class Thread {
     void setStatus(ThreadStatus st) { status = st; }
     char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
-    int getUserID();
-    int getThreadID();
+    int getUserID(){return userID;}
+    int getThreadID(){return threadID;}
+    char* getStatus(){return (ThreadStatusInChar[status]);}
+    void printThreadInfo();
   private:
     // some of the private data for this class is listed above
     
