@@ -33,7 +33,7 @@ SimpleThread(int which)
 {
     //which 此处代表loop次数
     int num;
-    
+    allThreadInfo();
     for (num = 0; num < which; num++) {
 	// printf("*** thread %d looped %d times\n", which, num);
         printf("*** thread name:%s userid:%d threadid:%d looped:%d times \n",
@@ -42,6 +42,22 @@ SimpleThread(int which)
     }
 }
 
+void
+SimpleThread2(int which)
+{
+    int num;
+    printf("*** thread name:%s priority:%d userid:%d threadid:%d looped:%d times \n",
+            currentThread->getName(),currentThread->getPriority(),currentThread->getUserID(),currentThread->getThreadID(),0);
+    if(which>=2){
+        Thread *t1 = new Thread("fork",which);
+        t1->Fork(SimpleThread2, (void*)which-3);
+    }
+    for (num = 1; num < 5; num++) {
+    // printf("*** thread %d looped %d times\n", which, num);
+        printf("*** thread name:%s priority:%d userid:%d threadid:%d looped:%d times \n",
+            currentThread->getName(),currentThread->getPriority(),currentThread->getUserID(),currentThread->getThreadID(),num);
+    }
+}
 //----------------------------------------------------------------------
 // ThreadTest1
 // 	Set up a ping-pong between two threads, by forking a thread 
@@ -109,6 +125,14 @@ ThreadTest3(){
     printf("\n");
 }
 
+void
+ThreadTest4()
+{
+    DEBUG('t', "Entering ThreadTest4");
+
+    SimpleThread2(5);
+}
+
 //----------------------------------------------------------------------
 // ThreadTest
 // 	Invoke a test routine.
@@ -126,6 +150,9 @@ ThreadTest()
     break;
     case 3:
     ThreadTest3();
+    break;
+    case 4:
+    ThreadTest4();
     break;
     default:
 	printf("No test specified.\n");

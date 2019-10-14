@@ -33,7 +33,7 @@ char* ThreadStatusInChar[]={"JUST_CREATED","RUNNING","READY","BLOCKED"};
 //	"threadName" is an arbitrary string, useful for debugging.
 //----------------------------------------------------------------------
 
-Thread::Thread(char* threadName)
+Thread::Thread(char* threadName,int p=8)
 {
     name = threadName;
     stackTop = NULL;
@@ -45,6 +45,12 @@ Thread::Thread(char* threadName)
     userID=getuid();
     threadID=allocatedThreadID();
     threadPointers[threadID]=this;
+    if(p<0)
+        priority=0;
+    else if(p>8)
+            priority=8;
+        else
+            priority=p;
 }
 
 //----------------------------------------------------------------------
@@ -187,11 +193,16 @@ Thread::Yield ()
     
     DEBUG('t', "Yielding thread \"%s\"\n", getName());
     
-    nextThread = scheduler->FindNextToRun();
-    if (nextThread != NULL) {
-	scheduler->ReadyToRun(this);
-	scheduler->Run(nextThread);
-    }
+    scheduler->ReadyToRun(this);
+    nextThread=scheduler->FindNextToRun();
+    if(nextThread!=NULL)
+        scheduler->Run(nextThread);
+
+    // nextThread = scheduler->FindNextToRun();
+ //    if (nextThread != NULL) {
+	// scheduler->ReadyToRun(this);
+	// scheduler->Run(nextThread);
+ //    }
     (void) interrupt->SetLevel(oldLevel);
 }
 
@@ -327,6 +338,6 @@ Thread::RestoreUserState()
 
 void
 Thread::printThreadInfo(){
-    printf("ThreadID:%d ThreadName:%s UserID:%d Status:%s\n",
-        getThreadID(),getName(),getUserID(),getStatus());
+    printf("ThreadID:%d Priority:%d ThreadName:%s UserID:%d Status:%s\n",
+        getThreadID(),getPriority(),getName(),getUserID(),getStatus());
 }
