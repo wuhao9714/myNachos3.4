@@ -83,7 +83,9 @@ class Thread {
     int userID;
     int threadID;
     int usedTimeSlice;
+    int maxTimeSlice;
     int totalTime;
+    int times;
   public:
     Thread(char* debugName);		// initialize a Thread 
     ~Thread(); 				// deallocate a Thread
@@ -113,7 +115,16 @@ class Thread {
     void resetUsedTimeSlice(){usedTimeSlice=0;}
     void advanceTime();
     void addTimeSlice();
+    void setMaxTimeSlice(int t){maxTimeSlice=t;}
     void getTotalTime();
+    int getTimes(){return times;}
+    void setTimes(int t){times=t;}
+    bool isItTime(){
+        if(usedTimeSlice<maxTimeSlice)
+            return FALSE;
+        else
+            return TRUE;
+    }
   private:
     // some of the private data for this class is listed above
     

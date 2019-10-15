@@ -29,7 +29,8 @@ class Scheduler {
     void Print();			// Print contents of ready list
     
   private:
-    List *readyList;  		// queue of threads that are ready to run,
+    List *readyList;
+    List *readyList2;  		// queue of threads that are ready to run,
 				// but not running
 };
 

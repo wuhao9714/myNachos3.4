@@ -159,7 +159,10 @@ thread.o: ../threads/thread.cc /usr/include/stdc-predef.h \
  ../threads/synch.h ../threads/list.h ../threads/system.h \
  ../threads/scheduler.h ../machine/interrupt.h ../threads/list.h \
  ../machine/stats.h ../machine/timer.h ../filesys/synchdisk.h \
- ../machine/disk.h ../threads/synch.h
+ ../machine/disk.h ../threads/synch.h /usr/include/unistd.h \
+ /usr/include/i386-linux-gnu/bits/posix_opt.h \
+ /usr/include/i386-linux-gnu/bits/environments.h \
+ /usr/include/i386-linux-gnu/bits/confname.h /usr/include/getopt.h
 utility.o: ../threads/utility.cc /usr/include/stdc-predef.h \
  ../threads/copyright.h ../threads/utility.h ../threads/bool.h \
  ../machine/sysdep.h ../threads/copyright.h /usr/include/stdio.h \

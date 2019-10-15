@@ -129,9 +129,9 @@ ThreadTest4(){
     Thread *t3 = new Thread("thread3");
   
 
-    t1->Fork(SimpleThread4, (void*)60);
-    t2->Fork(SimpleThread4, (void*)20);
-    t3->Fork(SimpleThread4, (void*)40);
+    t1->Fork(SimpleThread4, (void*)100);
+    t2->Fork(SimpleThread4, (void*)40);
+    t3->Fork(SimpleThread4, (void*)60);
 
     currentThread->advanceTime();
 }

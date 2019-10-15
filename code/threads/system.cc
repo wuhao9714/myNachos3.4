@@ -95,7 +95,7 @@ allThreadInfo(){
 static void
 TimerInterruptHandler(int dummy)
 {
-    if (interrupt->getStatus() != IdleMode && currentThread->getUsedTimeSlice() >= TimerSlice)
+    if (interrupt->getStatus() != IdleMode && currentThread->isItTime())
 	interrupt->YieldOnReturn();
 }
 

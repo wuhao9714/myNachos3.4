@@ -45,6 +45,8 @@ Thread::Thread(char* threadName)
     userID=getuid();
     threadID=allocatedThreadID();
     threadPointers[threadID]=this;
+    times=0;
+    maxTimeSlice=TimerSlice;
 }
 
 //----------------------------------------------------------------------
@@ -188,7 +190,9 @@ Thread::Yield ()
     DEBUG('t', "Yielding thread \"%s\"\n", getName());
     
     currentThread->resetUsedTimeSlice();
+    currentThread->setMaxTimeSlice(2*TimerSlice);
     nextThread = scheduler->FindNextToRun();
+
     if (nextThread != NULL) {
 	scheduler->ReadyToRun(this);
 	scheduler->Run(nextThread);
