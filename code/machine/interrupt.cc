@@ -156,6 +156,7 @@ Interrupt::OneTick()
     if (status == SystemMode) {
         stats->totalTicks += SystemTick;
 	stats->systemTicks += SystemTick;
+    currentThread->addTimeSlice();
     } else {					// USER_PROGRAM
 	stats->totalTicks += UserTick;
 	stats->userTicks += UserTick;
@@ -293,7 +294,7 @@ Interrupt::CheckIfDue(bool advanceClock)
     MachineStatus old = status;
     int when;
 
-    ASSERT(level == IntOff);		// interrupts need to be disabled,
+    //ASSERT(level == IntOff);		// interrupts need to be disabled,
 					// to invoke an interrupt handler
     if (DebugIsEnabled('i'))
 	DumpState();

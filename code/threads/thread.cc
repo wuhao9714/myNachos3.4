@@ -98,10 +98,10 @@ Thread::Fork(VoidFunctionPtr func, void *arg)
     
     StackAllocate(func, arg);
 
-    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    //IntStatus oldLevel = interrupt->SetLevel(IntOff);
     scheduler->ReadyToRun(this);	// ReadyToRun assumes that interrupts 
 					// are disabled!
-    (void) interrupt->SetLevel(oldLevel);
+    //(void) interrupt->SetLevel(oldLevel);
 }    
 
 //----------------------------------------------------------------------
@@ -149,7 +149,7 @@ Thread::CheckOverflow()
 void
 Thread::Finish ()
 {
-    (void) interrupt->SetLevel(IntOff);		
+    //(void) interrupt->SetLevel(IntOff);		
     ASSERT(this == currentThread);
     
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
@@ -181,18 +181,19 @@ void
 Thread::Yield ()
 {
     Thread *nextThread;
-    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    //IntStatus oldLevel = interrupt->SetLevel(IntOff);
     
     ASSERT(this == currentThread);
     
     DEBUG('t', "Yielding thread \"%s\"\n", getName());
     
+    currentThread->resetUsedTimeSlice();
     nextThread = scheduler->FindNextToRun();
     if (nextThread != NULL) {
 	scheduler->ReadyToRun(this);
 	scheduler->Run(nextThread);
     }
-    (void) interrupt->SetLevel(oldLevel);
+    //(void) interrupt->SetLevel(oldLevel);
 }
 
 //----------------------------------------------------------------------
@@ -220,7 +221,7 @@ Thread::Sleep ()
     Thread *nextThread;
     
     ASSERT(this == currentThread);
-    ASSERT(interrupt->getLevel() == IntOff);
+    //ASSERT(interrupt->getLevel() == IntOff);
     
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
 
@@ -329,4 +330,16 @@ void
 Thread::printThreadInfo(){
     printf("ThreadID:%d ThreadName:%s UserID:%d Status:%s\n",
         getThreadID(),getName(),getUserID(),getStatus());
+}
+
+void
+Thread::addTimeSlice(){
+    usedTimeSlice += SystemTick;
+    totalTime += SystemTick;
+}
+
+void
+Thread::advanceTime(){
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    (void) interrupt->SetLevel(oldLevel);
 }

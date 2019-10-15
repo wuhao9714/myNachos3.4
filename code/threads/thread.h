@@ -82,6 +82,8 @@ class Thread {
     void *machineState[MachineStateSize];  // all registers except for stackTop
     int userID;
     int threadID;
+    int usedTimeSlice;
+    int totalTime;
   public:
     Thread(char* debugName);		// initialize a Thread 
     ~Thread(); 				// deallocate a Thread
@@ -107,6 +109,11 @@ class Thread {
     int getThreadID(){return threadID;}
     char* getStatus(){return (ThreadStatusInChar[status]);}
     void printThreadInfo();
+    int getUsedTimeSlice(){return usedTimeSlice;}
+    void resetUsedTimeSlice(){usedTimeSlice=0;}
+    void advanceTime();
+    void addTimeSlice();
+    void getTotalTime();
   private:
     // some of the private data for this class is listed above
     

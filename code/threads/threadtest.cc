@@ -42,6 +42,19 @@ SimpleThread(int which)
     }
 }
 
+void
+SimpleThread4(int which)
+{
+    //which 此处代表loop次数
+    int num;
+    
+    for (num = 0; num < which; num+=10) {
+        printf("*** thread name:%s threadid:%d usedtime:%d timeslice:%d\n",
+            currentThread->getName(),currentThread->getThreadID(),num+10,currentThread->getUsedTimeSlice()+10);
+        currentThread->advanceTime();
+    }
+}
+
 //----------------------------------------------------------------------
 // ThreadTest1
 // 	Set up a ping-pong between two threads, by forking a thread 
@@ -109,6 +122,20 @@ ThreadTest3(){
     printf("\n");
 }
 
+void
+ThreadTest4(){
+    Thread *t1 = new Thread("thread1");
+    Thread *t2 = new Thread("thread2");
+    Thread *t3 = new Thread("thread3");
+  
+
+    t1->Fork(SimpleThread4, (void*)60);
+    t2->Fork(SimpleThread4, (void*)20);
+    t3->Fork(SimpleThread4, (void*)40);
+
+    currentThread->advanceTime();
+}
+
 //----------------------------------------------------------------------
 // ThreadTest
 // 	Invoke a test routine.
@@ -126,6 +153,9 @@ ThreadTest()
     break;
     case 3:
     ThreadTest3();
+    break;
+    case 4:
+    ThreadTest4();
     break;
     default:
 	printf("No test specified.\n");
