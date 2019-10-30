@@ -212,3 +212,23 @@ void Machine::WriteRegister(int num, int value)
 	registers[num] = value;
     }
 
+void Machine::TLBswap(int virtAddr,int way){
+    int i;
+    for(i=0;i<TLBSize;i++){
+        if(!tlb[i].valid){
+            tlb[i]=currentThread->space->pageTable[i];
+            tlb[i].enter=stats->userTicks;
+            tlb[i].lastused=stats->userTicks;
+            break;
+        }
+    }
+    if(i!=TLBSize) return;
+    i=0;
+    for(int j=1;j<TLBSize;j++){
+        if(tlb[i].enter>tlb[j].enter)
+            i=j;
+    }
+    tlb[i]=currentThread->space->pageTable[i];
+    tlb[i].enter=stats->userTicks;
+    tlb[i].lastused=stats->userTicks;
+}
