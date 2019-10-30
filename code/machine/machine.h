@@ -145,7 +145,7 @@ class Machine {
 
     void Debugger();		// invoke the user program debugger
     void DumpState();		// print the user CPU and memory state 
-
+	void TLBswap(int virtAddr,int way);
 
 // Data structures -- all of these are accessible to Nachos kernel code.
 // "public" for convenience.
@@ -157,7 +157,8 @@ class Machine {
 				// code and data, while executing
     int registers[NumTotalRegs]; // CPU registers, for executing user programs
 
-
+	int tlbhit;
+	int tlbunhit;
 // NOTE: the hardware translation of virtual addresses in the user program
 // to physical addresses (relative to the beginning of "mainMemory")
 // can be controlled by one of:

@@ -53,10 +53,24 @@ ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
 
-    if ((which == SyscallException) && (type == SC_Halt)) {
-	DEBUG('a', "Shutdown, initiated by user program.\n");
-   	interrupt->Halt();
-    } else {
+    if (which == SyscallException) {
+        if(type == SC_Halt){
+            DEBUG('a', "Shutdown, initiated by user program.\n");
+   	        interrupt->Halt();
+        }
+        if(type == SC_Exit){
+            printf("Hit times:%d Unhit times:%d Hit rate:%f\n",
+            machine->tlbhit,machine->tlbunhit,
+            (float)machine->tlbhit/(float)(machine->tlbhit+machine->tlbunhit));
+            currentThread->Finish();
+        }
+    }else if(which == PageFaultException) {
+        if(machine->tlb!= NULL){
+            int addr = (unsigned)machine->ReadRegister(BadVAddrReg)/PageSize;
+            machine->TLBswap(addr,0);
+        }
+    }
+    else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);
     }
