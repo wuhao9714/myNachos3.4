@@ -227,7 +227,7 @@ Interrupt::Idle()
     // queue, it is time to stop.   If the console or the network is 
     // operating, there are *always* pending interrupts, so this code
     // is not reached.  Instead, the halt must be invoked by the user program.
-
+    delete threadToBeDestroyed;
     DEBUG('i', "Machine idle.  No interrupts to do.\n");
     printf("No threads ready or runnable, and no pending interrupts.\n");
     printf("Assuming the program completed.\n");

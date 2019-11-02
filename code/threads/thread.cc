@@ -25,6 +25,7 @@
 					// execution stack, for detecting 
 					// stack overflows
 char* ThreadStatusInChar[]={"JUST_CREATED","RUNNING","READY","BLOCKED"};
+
 //----------------------------------------------------------------------
 // Thread::Thread
 // 	Initialize a thread control block, so that we can then call
@@ -41,6 +42,7 @@ Thread::Thread(char* threadName)
     status = JUST_CREATED;
 #ifdef USER_PROGRAM
     space = NULL;
+    // InitUserRegisters();
 #endif
     userID=getuid();
     threadID=allocatedThreadID();
@@ -63,11 +65,16 @@ Thread::~Thread()
 {
     DEBUG('t', "Deleting thread \"%s\"\n", name);
 
-    ASSERT(this != currentThread);
+    //ASSERT(this != currentThread);
     if (stack != NULL)
 	DeallocBoundedArray((char *) stack, StackSize * sizeof(int));
     threadIDs[threadID]=0;
     threadPointers[threadID]=NULL;
+    printf("%d thread is destoryed\n",threadID);
+#ifdef USER_PROGRAM
+    delete space;
+    machine->printIPT();
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -301,6 +308,15 @@ Thread::StackAllocate (VoidFunctionPtr func, void *arg)
 //	one for its state while executing user code, one for its state 
 //	while executing kernel code.  This routine saves the former.
 //----------------------------------------------------------------------
+
+void
+Thread::InitUserRegisters(){
+    for(int i=0;i<NumTotalRegs;i++)
+        userRegisters[i]=0;
+    userRegisters[PCReg]=0;
+    userRegisters[NextPCReg]=4;
+    userRegisters[StackReg]=space->getStackReg();
+}
 
 void
 Thread::SaveUserState()

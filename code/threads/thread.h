@@ -53,7 +53,7 @@
 
 // Size of the thread's private execution stack.
 // WATCH OUT IF THIS ISN'T BIG ENOUGH!!!!!
-#define StackSize	(4 * 1024)	// in words
+#define StackSize	(8 * 1024)	// in words
 
 
 // Thread state
@@ -137,7 +137,7 @@ class Thread {
   public:
     void SaveUserState();		// save user-level register state
     void RestoreUserState();		// restore user-level register state
-
+    void InitUserRegisters();
     AddrSpace *space;			// User code this thread is running.
 #endif
 };

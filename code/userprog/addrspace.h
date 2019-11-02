@@ -16,7 +16,7 @@
 #include "copyright.h"
 #include "filesys.h"
 
-#define UserStackSize		1024 	// increase this as necessary!
+#define UserStackSize		2 * 1024 	// increase this as necessary!
 
 class AddrSpace {
   public:
@@ -30,12 +30,16 @@ class AddrSpace {
 
     void SaveState();			// Save/restore address space-specific
     void RestoreState();		// info on a context switch 
-
+    TranslationEntry * getPageTable(){return pageTable;}
+    int getStackReg(){return numPages * PageSize - 16;}
+    TranslationEntry getPTE(int vpn);
+    TranslationEntry getIPTE(int vpn);
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
 					// for now!
     unsigned int numPages;		// Number of pages in the virtual 
 					// address space
+    OpenFile* swapspace;
 };
 
 #endif // ADDRSPACE_H

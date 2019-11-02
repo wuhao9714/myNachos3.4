@@ -229,16 +229,19 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
         for (entry = NULL, i = 0; i < TLBSize; i++)
     	    if (tlb[i].valid && (tlb[i].virtualPage == vpn)) {
 		entry = &tlb[i];			// FOUND!
+		entry->lastused=stats->totalTicks;
+		tlbhit++;
+		//printf("find vpn %d at %d in TLB\n",vpn,i);
 		break;
 	    }
 	if (entry == NULL) {				// not found
     	    DEBUG('a', "*** no valid TLB entry found for this virtual page!\n");
-    	    machine->tlbunhit++;
+    	    //printf("not find vpn %d in TLB\n",vpn);
+    	    tlbunhit++;
 			return PageFaultException;		// really, this is a TLB fault,
 						// the page may be in memory,
 						// but not in the TLB
 	}
-	machine->tlbhit++;
     }
 
     if (entry->readOnly && writing) {	// trying to write to a read-only page

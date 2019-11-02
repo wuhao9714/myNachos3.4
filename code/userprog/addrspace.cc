@@ -78,7 +78,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
-    ASSERT(numPages <= NumPhysPages);		// check we're not trying
+    //ASSERT(numPages <= NumPhysPages);		// check we're not trying
 						// to run anything too big --
 						// at least until we have
 						// virtual memory
@@ -86,38 +86,74 @@ AddrSpace::AddrSpace(OpenFile *executable)
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
 // first, set up the translation 
-    pageTable = new TranslationEntry[numPages];
-    for (i = 0; i < numPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
-					// a separate page, we could set its 
-					// pages to be read-only
-    pageTable[i].enter=0;
-    pageTable[i].lastused=0;
-    }
+ //    pageTable = new TranslationEntry[numPages];
+ //    for (i = 0; i < numPages; i++) {
+	// pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
+	// pageTable[i].physicalPage = i;//machine->RequestPage();
+	// pageTable[i].valid = FALSE;//TRUE;
+	// pageTable[i].use = FALSE;
+	// pageTable[i].dirty = FALSE;
+	// pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
+	// 				// a separate page, we could set its 
+	// 				// pages to be read-only
+ //    pageTable[i].enter=0;
+ //    pageTable[i].lastused=0;
+ //    pageTable[i].pageenter=0;
+ //    }
     
-// zero out the entire address space, to zero the unitialized data segment 
-// and the stack segment
-    bzero(machine->mainMemory, size);
-
-// then, copy in the code and data segments into memory
-    if (noffH.code.size > 0) {
-        DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
-			noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
-			noffH.code.size, noffH.code.inFileAddr);
+    fileSystem->Create("swapspace",size);
+    swapspace=fileSystem->Open("swapspace");
+    if (swapspace == NULL) ASSERT(FALSE);
+    if(noffH.code.size > 0){
+    	char *ch;
+    	for (int i = 0; i < noffH.code.size; i++) {
+			executable->ReadAt(ch, 1, noffH.code.inFileAddr+i);
+			swapspace->WriteAt(ch, 1, noffH.code.virtualAddr+i);
+		}
     }
     if (noffH.initData.size > 0) {
-        DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
-			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
-    }
+		char *ch;
+		for (int i = 0; i < noffH.initData.size; i++) {
+			executable->ReadAt(ch, 1, noffH.initData.inFileAddr+i);
+			swapspace->WriteAt(ch, 1, noffH.initData.virtualAddr+i);
+		}
+	}
+// zero out the entire address space, to zero the unitialized data segment 
+// and the stack segment
+    //bzero(machine->mainMemory, size);
 
+// then, copy in the code and data segments into memory
+   //  if (noffH.code.size > 0) {
+   //      DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
+			// noffH.code.virtualAddr, noffH.code.size);
+   //      executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
+			// noffH.code.size, noffH.code.inFileAddr);
+   //  }
+   //  if (noffH.initData.size > 0) {
+   //      DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
+			// noffH.initData.virtualAddr, noffH.initData.size);
+   //      executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
+			// noffH.initData.size, noffH.initData.inFileAddr);
+   //  }
+
+    // if (noffH.code.size > 0){
+    // 	int inFileAddr=noffH.code.inFileAddr;
+    // 	for(int i=0;i<noffH.code.size;i++){
+    // 		int virPageNum=(noffH.code.virtualAddr+i)/PageSize;
+    // 		int offset=(noffH.code.virtualAddr+i)%PageSize;
+    // 		int phyPageNum=pageTable[virPageNum].physicalPage;
+    // 		executable->ReadAt(&(machine->mainMemory[phyPageNum*PageSize+offset]),1,inFileAddr++);
+    // 	}
+    // }
+    // if (noffH.initData.size > 0){
+    // 	int inFileAddr=noffH.initData.inFileAddr;
+    // 	for(int i=0;i<noffH.initData.size;i++){
+    // 		int virPageNum=(noffH.initData.virtualAddr+i)/PageSize;
+    // 		int offset=(noffH.initData.virtualAddr+i)%PageSize;
+    // 		int phyPageNum=pageTable[virPageNum].physicalPage;
+    // 		executable->ReadAt(&(machine->mainMemory[phyPageNum*PageSize+offset]),1,inFileAddr++);
+    // 	}
+    // }
 }
 
 //----------------------------------------------------------------------
@@ -127,7 +163,20 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
-   delete pageTable;
+	//for (int i = 0; i < numPages; ++i) {
+	//	if(pageTable[i].valid==TRUE)
+	//		machine->bitmap->Clear(pageTable[i].physicalPage);
+		// printf("deallocate memory %d\n",pageTable[i].physicalPage);
+	//}
+   //delete pageTable;
+	TranslationEntry *ipt=machine->invertedPageTable;
+	for(int i=0;i<NumPhysPages;i++){
+		if(ipt[i].valid&&ipt[i].tid==currentThread->getThreadID()){
+			machine->bitmap->Clear(ipt[i].physicalPage);
+			ipt[i].valid=FALSE;
+		}
+	}
+   fileSystem->Remove("swapspace");
 }
 
 //----------------------------------------------------------------------
@@ -171,7 +220,11 @@ AddrSpace::InitRegisters()
 //----------------------------------------------------------------------
 
 void AddrSpace::SaveState() 
-{}
+{
+	for(int i = 0; i < TLBSize; ++i){
+		machine->tlb[i].valid = FALSE;
+	}
+}
 
 //----------------------------------------------------------------------
 // AddrSpace::RestoreState
@@ -183,6 +236,94 @@ void AddrSpace::SaveState()
 
 void AddrSpace::RestoreState() 
 {
+#ifndef USE_TLB
     machine->pageTable = pageTable;
     machine->pageTableSize = numPages;
+#endif
+}
+
+TranslationEntry AddrSpace::getPTE(int vpn){
+	if(pageTable[vpn].valid==TRUE)
+		return pageTable[vpn];
+	int pos=machine->RequestPage();
+	if(pos==-1){
+		int min;
+		for(int i=0;i<numPages;i++){
+			if(pageTable[i].valid==TRUE){
+				pos=i;
+				min=pageTable[i].pageenter;
+				break;
+			}
+		}
+		for(int i=pos+1;i<numPages;i++){
+			if(pageTable[i].valid==TRUE&&pageTable[i].pageenter<min){
+				pos=i;
+				min=pageTable[i].pageenter;
+			}
+		}
+		printf("vpn %d pagefault,load into ppn %d in vpn %d\n",vpn,pageTable[pos].physicalPage,pos);
+		if(pageTable[pos].dirty==TRUE){
+			swapspace->WriteAt(&(machine->mainMemory[pageTable[pos].physicalPage*PageSize]),
+				PageSize,pos*PageSize);
+		}
+		pageTable[pos].valid=FALSE;
+		pos=pageTable[pos].physicalPage;
+	}
+	else
+		printf("vpn %d pagefault,load into free ppn %d\n",vpn,pos);
+	swapspace->ReadAt(&(machine->mainMemory[pos*PageSize]),PageSize,vpn*PageSize);
+	pageTable[vpn].physicalPage = pos;//machine->RequestPage();
+	pageTable[vpn].valid = TRUE;//TRUE;
+	pageTable[vpn].use = FALSE;
+	pageTable[vpn].dirty = FALSE;
+	pageTable[vpn].readOnly = FALSE;  
+    pageTable[vpn].enter=0;
+    pageTable[vpn].lastused=0;
+    pageTable[vpn].pageenter=stats->userTicks;
+    printf("pageenter %d\n",pageTable[vpn].pageenter);
+    return pageTable[vpn];
+}
+
+TranslationEntry AddrSpace::getIPTE(int vpn){
+	int ppn;
+	TranslationEntry *ipt=machine->invertedPageTable;
+	for(ppn=0;ppn<NumPhysPages;ppn++){
+		if(ipt[ppn].valid&&ipt[ppn].virtualPage==vpn&&ipt[ppn].tid==currentThread->getThreadID())
+			return ipt[ppn];
+	}
+	if(ppn==NumPhysPages){
+		ppn=machine->RequestPage();
+		if(ppn==-1){
+			int min;
+			for(int i=0;i<NumPhysPages;i++){
+				if(ipt[i].valid==TRUE&&ipt[i].tid==currentThread->getThreadID()){
+					ppn=i;
+					min=ipt[i].pageenter;
+					break;
+				}
+			}
+			for(int i=ppn+1;i<NumPhysPages;i++){
+				if(ipt[i].valid==TRUE&&ipt[i].pageenter<min){
+					ppn=i;
+					min=pageTable[i].pageenter;
+				}
+			}
+			int svpn=ipt[ppn].virtualPage;
+			if(ipt[ppn].dirty==TRUE){
+				swapspace->WriteAt(&(machine->mainMemory[ppn*PageSize]),
+				PageSize,svpn*PageSize);
+			}
+		}
+		swapspace->ReadAt(&(machine->mainMemory[ppn*PageSize]),PageSize,vpn*PageSize);
+		ipt[ppn].valid=TRUE;
+		ipt[ppn].virtualPage=vpn;
+		ipt[ppn].tid=currentThread->getThreadID();
+		ipt[ppn].use = FALSE;
+		ipt[ppn].dirty = FALSE;
+		ipt[ppn].readOnly = FALSE;  
+    	ipt[ppn].enter=0;
+    	ipt[ppn].lastused=0;
+    	ipt[ppn].pageenter=stats->userTicks;
+	}
+	return ipt[ppn];
 }

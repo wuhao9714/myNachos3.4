@@ -59,6 +59,7 @@ ExceptionHandler(ExceptionType which)
    	        interrupt->Halt();
         }
         if(type == SC_Exit){
+            machine->printIPT();
             printf("Hit times:%d Unhit times:%d Hit rate:%f\n",
             machine->tlbhit,machine->tlbunhit,
             (float)machine->tlbhit/(float)(machine->tlbhit+machine->tlbunhit));
@@ -66,8 +67,8 @@ ExceptionHandler(ExceptionType which)
         }
     }else if(which == PageFaultException) {
         if(machine->tlb!= NULL){
-            int addr = (unsigned)machine->ReadRegister(BadVAddrReg)/PageSize;
-            machine->TLBswap(addr,0);
+            int pn = (unsigned)machine->ReadRegister(BadVAddrReg)/PageSize;
+            machine->TLBswap(pn,0);
         }
     }
     else {

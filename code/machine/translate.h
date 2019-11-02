@@ -42,6 +42,8 @@ class TranslationEntry {
 			// page is modified.
     int enter;
     int lastused;
+    int pageenter;
+    int tid;
 };
 
 #endif
