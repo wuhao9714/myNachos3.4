@@ -39,7 +39,7 @@ Lock * rLock=new Lock("rLock");
 Semaphore * wSema=new Semaphore("wSema",1);
 int content=0;
 
-RingBuffer *rbuffer=new RingBuffer(7);
+RingBuffer *rbuffer=new RingBuffer(5);
 //----------------------------------------------------------------------
 // SimpleThread
 // 	Loop 5 times, yielding the CPU to another ready thread 
@@ -402,19 +402,18 @@ void Producer3(int which){
     int buffer[1];
     int count=0;
     int num;
-    interrupt->OneTick();
     for(int i=0;i<which;i++){
-        buffer[0]=count++;
+        interrupt->OneTick();
+        buffer[0]=count;
         num=rbuffer->put(buffer,1);
         if(num==0){
-            printf("buffer is full,put nothing...\n");
+            printf("%s:buffer is full, put nothing...\n",currentThread->getName());
         }
         else{
-            printf("put product %d at buffer [%d]\n",buffer[0],(rbuffer->in-1+rbuffer->size)%rbuffer->size);
+            count++;
+            printf("%s:put product %d at buffer [%d]\n",
+                currentThread->getName(),buffer[0],(rbuffer->in-1+rbuffer->size)%rbuffer->size);
         }
-        interrupt->OneTick();
-        interrupt->OneTick();
-        interrupt->OneTick();
     }
 }
 void Consumer3(int which){
@@ -443,28 +442,25 @@ void Consumer3(int which){
     //     }
     // }
     int buffer[1];
-    int count=0;
     int num;
-    interrupt->OneTick();
     for(int i=0;i<which;i++){
-        buffer[0]=count++;
+        interrupt->OneTick();
+        interrupt->OneTick();
         num=rbuffer->get(buffer,1);
         if(num==0){
-            printf("buffer is full,put nothing...\n");
+            printf("%s:buffer is empty, get nothing...\n",currentThread->getName());
         }
         else{
-            printf("get product %d at buffer [%d]\n",buffer[0],(rbuffer->out-1+rbuffer->size)%rbuffer->size);
+            printf("%s:get product %d at buffer [%d]\n",
+                currentThread->getName(),buffer[0],(rbuffer->out-1+rbuffer->size)%rbuffer->size);
         }
-        interrupt->OneTick();
-        interrupt->OneTick();
-        interrupt->OneTick();
     }
 }
 void kfifoTest(){
     Thread *p=new Thread("producer");
     Thread *c=new Thread("consumer");
-    p->Fork(Producer3,12);
     c->Fork(Consumer3,12);
+    p->Fork(Producer3,12);
 }
 //----------------------------------------------------------------------
 // ThreadTest

@@ -174,7 +174,6 @@ int RingBuffer::get(int *buffer,int s){
         out=(out+1)%size;
         full--;
     }
-    printf("%d\n",full );
     return s;
 }
 int RingBuffer::put(int *buffer,int s){
@@ -183,12 +182,10 @@ int RingBuffer::put(int *buffer,int s){
     // else
     //     full=((in-out)+size)%size;
     s=min(size-full,s);
-    printf("%d ",s);
     for(int i=0;i<s;i++){
         ringbuffer[in]=buffer[i];
         in=(in+1)%size;
         full++;
     }
-    printf("%d\n",full );
     return s;
 }
