@@ -100,13 +100,95 @@ Semaphore::V()
 // Dummy functions -- so we can compile our later assignments 
 // Note -- without a correct implementation of Condition::Wait(), 
 // the test case in the network assignment won't work!
-Lock::Lock(char* debugName) {}
-Lock::~Lock() {}
-void Lock::Acquire() {}
-void Lock::Release() {}
+Lock::Lock(char* debugName) {
+    name=debugName;
+    lock = new Semaphore(debugName,1);
+    held=NULL;
+}
+Lock::~Lock() {
+    delete lock;
+}
+void Lock::Acquire() {
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    lock->P();
+    held = currentThread;
+    (void) interrupt->SetLevel(oldLevel);
+}
+void Lock::Release() {
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    ASSERT(currentThread==held);
+    lock->V();
+    held=NULL;
+    (void) interrupt->SetLevel(oldLevel);
+}
+bool Lock::isHeldByCurrentThread(){return currentThread==held;}
+Condition::Condition(char* debugName) {
+    name=debugName;
+    queue=new List();
+}
+Condition::~Condition() {
+    delete queue;
+}
+void Condition::Wait(Lock* conditionLock) {
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    ASSERT(conditionLock->isHeldByCurrentThread());
+    conditionLock->Release();
+    queue->Append(currentThread);
+    currentThread->Sleep();
+    conditionLock->Acquire();
+    (void) interrupt->SetLevel(oldLevel);
+}
+void Condition::Signal(Lock* conditionLock) {
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    ASSERT(conditionLock->isHeldByCurrentThread());
+    if(!queue->IsEmpty()){
+        Thread *next=(Thread*)queue->Remove();
+        scheduler->ReadyToRun(next);
+    }
+    (void) interrupt->SetLevel(oldLevel);
+}
+void Condition::Broadcast(Lock* conditionLock) {
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);
+    ASSERT(conditionLock->isHeldByCurrentThread());
+    while(!queue->IsEmpty()){
+        Signal(conditionLock);
+    }
+    (void) interrupt->SetLevel(oldLevel);
+}
 
-Condition::Condition(char* debugName) { }
-Condition::~Condition() { }
-void Condition::Wait(Lock* conditionLock) { ASSERT(FALSE); }
-void Condition::Signal(Lock* conditionLock) { }
-void Condition::Broadcast(Lock* conditionLock) { }
+// RingBuffer::RingBuffer(int s) {
+//     ASSERT(s<=MAX);
+//     size=s;
+//     in=0;
+//     out=0;
+// }
+
+int RingBuffer::get(int *buffer,int s){
+    // if(in==out&&ringbuffer[0]!=-1)
+    //     full=size;
+    // else
+    //     full=((in-out)+size)%size;
+    s=min(full,s);
+    for(int i=0;i<s;i++){
+        buffer[i]=ringbuffer[out];
+        out=(out+1)%size;
+        full--;
+    }
+    printf("%d\n",full );
+    return s;
+}
+int RingBuffer::put(int *buffer,int s){
+    // if(in==out&&ringbuffer[0]!=-1)
+    //     full=size;
+    // else
+    //     full=((in-out)+size)%size;
+    s=min(size-full,s);
+    printf("%d ",s);
+    for(int i=0;i<s;i++){
+        ringbuffer[in]=buffer[i];
+        in=(in+1)%size;
+        full++;
+    }
+    printf("%d\n",full );
+    return s;
+}

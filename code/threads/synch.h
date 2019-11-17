@@ -20,7 +20,7 @@
 #include "copyright.h"
 #include "thread.h"
 #include "list.h"
-
+#define min(a, b) (((a) < (b)) ? (a) : (b))
 // The following class defines a "semaphore" whose value is a non-negative
 // integer.  The semaphore has only two operations P() and V():
 //
@@ -80,6 +80,8 @@ class Lock {
   private:
     char* name;				// for debugging
     // plus some other stuff you'll need to define
+    Semaphore *lock;
+    Thread *held;
 };
 
 // The following class defines a "condition variable".  A condition
@@ -132,5 +134,25 @@ class Condition {
   private:
     char* name;
     // plus some other stuff you'll need to define
+    List *queue;
+};
+
+class RingBuffer {
+public:
+	RingBuffer(int s){
+		size=s;
+    in=0;
+    out=0;
+    full=0;
+    for(int i=0;i<10;i++) ringbuffer[i]=-1;
+	}
+	~RingBuffer();
+	int get(int *buffer,int s);
+	int put(int *buffer,int s);
+	int ringbuffer[10];
+	int size;
+	int in;
+	int out;
+	int full;
 };
 #endif // SYNCH_H

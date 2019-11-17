@@ -70,7 +70,7 @@ Thread::~Thread()
 	DeallocBoundedArray((char *) stack, StackSize * sizeof(int));
     threadIDs[threadID]=0;
     threadPointers[threadID]=NULL;
-    printf("%d thread is destoryed\n",threadID);
+    //printf("%d thread is destoryed\n",threadID);
 #ifdef USER_PROGRAM
     delete space;
     machine->printIPT();

@@ -95,7 +95,8 @@ allThreadInfo(){
 static void
 TimerInterruptHandler(int dummy)
 {
-    if (interrupt->getStatus() != IdleMode && currentThread->getUsedTimeSlice() >= TimerSlice)
+    //if (interrupt->getStatus() != IdleMode && currentThread->getUsedTimeSlice() >= TimerSlice)
+    if (interrupt->getStatus() != IdleMode)
 	interrupt->YieldOnReturn();
 }
 
@@ -171,7 +172,7 @@ Initialize(int argc, char **argv)
     stats = new Statistics();			// collect statistics
     interrupt = new Interrupt;			// start up interrupt handling
     scheduler = new Scheduler();		// initialize the ready queue
-    //if (randomYield)				// start the timer (if needed)
+    if (randomYield)				// start the timer (if needed)
 	timer = new Timer(TimerInterruptHandler, 0, FALSE);
 
     threadToBeDestroyed = NULL;

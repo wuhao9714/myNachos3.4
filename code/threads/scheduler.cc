@@ -91,7 +91,7 @@ void
 Scheduler::Run (Thread *nextThread)
 {
     Thread *oldThread = currentThread;
-    
+    //printf("thread %d is running!\n",nextThread->getThreadID());
 #ifdef USER_PROGRAM			// ignore until running user programs 
     if (currentThread->space != NULL) {	// if this thread is a user program,
         currentThread->SaveUserState(); // save the user's CPU registers
@@ -122,7 +122,7 @@ Scheduler::Run (Thread *nextThread)
     // before now (for example, in Thread::Finish()), because up to this
     // point, we were still running on the old thread's stack!
     if (threadToBeDestroyed != NULL) {
-        printf("delete %s\n",threadToBeDestroyed->getName());
+        //printf("delete %s\n",threadToBeDestroyed->getName());
         delete threadToBeDestroyed;
 	threadToBeDestroyed = NULL;
     }
