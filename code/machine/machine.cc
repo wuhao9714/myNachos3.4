@@ -70,7 +70,7 @@ Machine::Machine(bool debug)
     tlb = NULL;
     pageTable = NULL;
 #endif
-
+    bitmap = new BitMap(NumPhysPages);
     singleStep = debug;
     CheckEndian();
 }
@@ -83,6 +83,7 @@ Machine::Machine(bool debug)
 Machine::~Machine()
 {
     delete [] mainMemory;
+    delete bitmap;
     if (tlb != NULL)
         delete [] tlb;
 }
@@ -101,7 +102,7 @@ void
 Machine::RaiseException(ExceptionType which, int badVAddr)
 {
     DEBUG('m', "Exception: %s\n", exceptionNames[which]);
-    
+    printf("Exception: %s\n", exceptionNames[which]);
 //  ASSERT(interrupt->getStatus() == UserMode);
     registers[BadVAddrReg] = badVAddr;
     DelayedLoad(0, 0);			// finish anything in progress
