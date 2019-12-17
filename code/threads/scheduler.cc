@@ -112,9 +112,9 @@ Scheduler::Run (Thread *nextThread)
     // in switch.s.  You may have to think
     // a bit to figure out what happens after this, both from the point
     // of view of the thread and from the perspective of the "outside world".
-
+    printf("before scheduler-run\n");
     SWITCH(oldThread, nextThread);
-    
+    printf("after scheduler-run\n");
     DEBUG('t', "Now in thread \"%s\"\n", currentThread->getName());
 
     // If the old thread gave up the processor because it was finishing,
@@ -122,6 +122,7 @@ Scheduler::Run (Thread *nextThread)
     // before now (for example, in Thread::Finish()), because up to this
     // point, we were still running on the old thread's stack!
     if (threadToBeDestroyed != NULL) {
+        printf("delete %s\n",threadToBeDestroyed->getName());
         delete threadToBeDestroyed;
 	threadToBeDestroyed = NULL;
     }

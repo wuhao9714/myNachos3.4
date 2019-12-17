@@ -14,6 +14,26 @@
 #include "addrspace.h"
 #include "synch.h"
 
+
+void simple(char *filename){
+    // OpenFile *executable = fileSystem->Open(filename);
+    AddrSpace *space;
+
+    // if (executable == NULL) {
+    // printf("Unable to open file %s\n", filename);
+    // return;
+    // }
+    space = new AddrSpace(filename);    
+    currentThread->space = space;
+
+    // delete executable;          // close file
+
+    space->InitRegisters();     // set the initial register values
+    space->RestoreState();      // load page table register
+    printf("run user program\n");
+    machine->Run();         // jump to the user progam
+    ASSERT(FALSE);          // machine->Run never returns;
+}
 //----------------------------------------------------------------------
 // StartProcess
 // 	Run a user program.  Open the executable, load it into
@@ -23,21 +43,32 @@
 void
 StartProcess(char *filename)
 {
-    OpenFile *executable = fileSystem->Open(filename);
+    Thread *secondthread = new Thread("secondthread");
+    secondthread->Fork(simple,filename);
+    Thread *thirdthread = new Thread("thirdthread");
+    thirdthread->Fork(simple,filename);
+    Thread *forththread = new Thread("forththread");
+    forththread->Fork(simple,filename);
+    Thread *fifththread = new Thread("fifththread");
+    fifththread->Fork(simple,filename);
+
+
+
+    // OpenFile *executable = fileSystem->Open(filename);
     AddrSpace *space;
 
-    if (executable == NULL) {
-	printf("Unable to open file %s\n", filename);
-	return;
-    }
-    space = new AddrSpace(executable);    
+ //    if (executable == NULL) {
+	// printf("Unable to open file %s\n", filename);
+	// return;
+ //    }
+    space = new AddrSpace(filename);    
     currentThread->space = space;
 
-    delete executable;			// close file
+    //delete executable;			// close file
 
     space->InitRegisters();		// set the initial register values
     space->RestoreState();		// load page table register
-
+    printf("run user program\n");
     machine->Run();			// jump to the user progam
     ASSERT(FALSE);			// machine->Run never returns;
 					// the address space exits

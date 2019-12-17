@@ -66,6 +66,9 @@ Thread::~Thread()
     if (stack != NULL)
 	DeallocBoundedArray((char *) stack, StackSize * sizeof(int));
     threadIDs[threadID]=0;
+#ifdef USER_PROGRAM
+    delete space;
+#endif
 }
 
 //----------------------------------------------------------------------
