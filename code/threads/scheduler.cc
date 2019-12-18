@@ -112,9 +112,9 @@ Scheduler::Run (Thread *nextThread)
     // in switch.s.  You may have to think
     // a bit to figure out what happens after this, both from the point
     // of view of the thread and from the perspective of the "outside world".
-    printf("before scheduler-run\n");
+    printf("Switch \"%s\" to \"%s\"\n",oldThread->getName(),currentThread->getName());
     SWITCH(oldThread, nextThread);
-    printf("after scheduler-run\n");
+    printf("Now in thread \"%s\"\n", currentThread->getName());
     DEBUG('t', "Now in thread \"%s\"\n", currentThread->getName());
 
     // If the old thread gave up the processor because it was finishing,

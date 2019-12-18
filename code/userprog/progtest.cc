@@ -23,16 +23,16 @@ void simple(char *filename){
     // printf("Unable to open file %s\n", filename);
     // return;
     // }
-    space = new AddrSpace(filename);    
-    currentThread->space = space;
+    // space = new AddrSpace(filename);    
+    // currentThread->space = space;
 
     // delete executable;          // close file
 
-    space->InitRegisters();     // set the initial register values
-    space->RestoreState();      // load page table register
-    printf("run user program\n");
-    machine->Run();         // jump to the user progam
-    ASSERT(FALSE);          // machine->Run never returns;
+    // space->InitRegisters();     // set the initial register values
+    // space->RestoreState();      // load page table register
+    printf("%s run user program\n",currentThread->getName());
+    //machine->Run();         // jump to the user progam
+    //ASSERT(FALSE);          // machine->Run never returns;
 }
 //----------------------------------------------------------------------
 // StartProcess
@@ -61,16 +61,16 @@ StartProcess(char *filename)
 	// printf("Unable to open file %s\n", filename);
 	// return;
  //    }
-    space = new AddrSpace(filename);    
-    currentThread->space = space;
+    // space = new AddrSpace(filename);    
+    // currentThread->space = space;
 
     //delete executable;			// close file
 
-    space->InitRegisters();		// set the initial register values
-    space->RestoreState();		// load page table register
-    printf("run user program\n");
-    machine->Run();			// jump to the user progam
-    ASSERT(FALSE);			// machine->Run never returns;
+    // space->InitRegisters();		// set the initial register values
+    // space->RestoreState();		// load page table register
+    printf("%s run user program\n",currentThread->getName());
+    //machine->Run();			// jump to the user progam
+    //ASSERT(FALSE);			// machine->Run never returns;
 					// the address space exits
 					// by doing the syscall "exit"
 }
