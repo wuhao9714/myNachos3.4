@@ -150,6 +150,11 @@ class Machine {
 
     int RequestPage(){return bitmap->Find();}
     BitMap* bitmap;
+    void PCadvance(){
+    registers[PrevPCReg] = registers[PCReg];
+    registers[PCReg] = registers[NextPCReg];
+    registers[NextPCReg] = registers[NextPCReg] + 4;
+}
 // Data structures -- all of these are accessible to Nachos kernel code.
 // "public" for convenience.
 //

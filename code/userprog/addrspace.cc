@@ -68,12 +68,10 @@ AddrSpace::AddrSpace(char* filename)
     programName=filename;
     OpenFile *executable = fileSystem->Open(programName);
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
-
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
-
 // how big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
 			+ UserStackSize;	// we need to increase the size
@@ -197,7 +195,9 @@ AddrSpace::InitRegisters()
 //----------------------------------------------------------------------
 
 void AddrSpace::SaveState() 
-{}
+{
+	pageTable=machine->pageTable;
+}
 
 //----------------------------------------------------------------------
 // AddrSpace::RestoreState
