@@ -11,6 +11,7 @@
  */
 
 #include "syscall.h"
+int f(){}
 
 int
 main()

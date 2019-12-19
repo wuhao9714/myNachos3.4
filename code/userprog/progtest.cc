@@ -16,7 +16,7 @@
 
 
 void simple(char *filename){
-    currentThread->Yield();
+    // currentThread->Yield();
     // OpenFile *executable = fileSystem->Open(filename);
     AddrSpace *space;
 
@@ -44,17 +44,17 @@ void simple(char *filename){
 void
 StartProcess(char *filename)
 {
-    Thread *secondthread = new Thread("secondthread");
-    secondthread->Fork(simple,filename);
-    Thread *thirdthread = new Thread("thirdthread");
-    thirdthread->Fork(simple,filename);
-    Thread *forththread = new Thread("forththread");
-    forththread->Fork(simple,filename);
-    Thread *fifththread = new Thread("fifththread");
-    fifththread->Fork(simple,filename);
+    // Thread *secondthread = new Thread("secondthread");
+    // secondthread->Fork(simple,filename);
+    // Thread *thirdthread = new Thread("thirdthread");
+    // thirdthread->Fork(simple,filename);
+    // Thread *forththread = new Thread("forththread");
+    // forththread->Fork(simple,filename);
+    // Thread *fifththread = new Thread("fifththread");
+    // fifththread->Fork(simple,filename);
 
 
-    currentThread->Yield();
+    // currentThread->Yield();
     // OpenFile *executable = fileSystem->Open(filename);
     AddrSpace *space;
 

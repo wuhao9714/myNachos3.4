@@ -47,7 +47,22 @@
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	are in machine.h.
 //----------------------------------------------------------------------
-
+void exec_func(int which){
+    currentThread->space->InitRegisters();		// set the initial register values
+    currentThread->space->RestoreState();
+    printf("%s run user program\n",currentThread->getName());
+    machine->Run();
+    ASSERT(FALSE);
+}
+void fork_func(void (*func)){
+	currentThread->space->InitRegisters();		// set the initial register values
+    currentThread->space->RestoreState();
+    machine->WriteRegister(PCReg,func);
+    machine->WriteRegister(NextPCReg,func+4);
+    printf("%s run user program\n",currentThread->getName());
+    machine->Run();
+    ASSERT(FALSE);
+}
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -61,13 +76,14 @@ ExceptionHandler(ExceptionType which)
 		case SC_Halt:
 		{
 			DEBUG('a', "Shutdown, initiated by user program.\n");
-			printf("halt\n");
+			printf("%s sys-halt\n",currentThread->getName());
 		   	interrupt->Halt();
 			break;
 		}
 		case SC_Create: 
 		{
-			int addr = registers[4];
+			printf("%s sys-create\n",currentThread->getName());
+			int addr = machine->ReadRegister(4);
 			int pos = 0;
 			char name[10];
 			while(1) {
@@ -77,15 +93,14 @@ ExceptionHandler(ExceptionType which)
 				if (data == 0)
 					break;
 			}
-			fileSystem->Create(name, 256);
-			registers[PrevPCReg] = registers[PCReg];
-			registers[PCReg] = registers[NextPCReg];
-			registers[NextPCReg] = registers[NextPCReg] + 4;
+			fileSystem->Create(name, 128);
+			machine->PCadvance();
 			break;
 		}
 		case SC_Open: 
 		{
-			int addr = registers[4];
+			printf("%s sys-open\n",currentThread->getName());
+			int addr = machine->ReadRegister(4);
 			int pos = 0;
 			char name[10];
 			while(1) {
@@ -96,101 +111,103 @@ ExceptionHandler(ExceptionType which)
 					break;
 			}
 			OpenFile* openfile = fileSystem->Open(name);
-			registers[2] = (int)openfile;
-			registers[PrevPCReg] = registers[PCReg];
-			registers[PCReg] = registers[NextPCReg];
-			registers[NextPCReg] = registers[NextPCReg] + 4;
+			machine->WriteRegister(2,int(openfile));
+			machine->PCadvance();
 			break;
 		}
 		case SC_Close: 
 		{
-			OpenFile* openFile = (OpenFile*)registers[4];
+			printf("%s sys-close\n",currentThread->getName());
+			OpenFile* openFile = (OpenFile*)machine->ReadRegister(4);
 			delete openFile;
-			registers[PrevPCReg] = registers[PCReg];
-			registers[PCReg] = registers[NextPCReg];
-			registers[NextPCReg] = registers[NextPCReg] + 4;
+			machine->PCadvance();
 			break;
 		}
 		case SC_Write: 
 		{
-			int pos = registers[4];
-			int size = registers[5];
-			OpenFile* openFile = (OpenFile*)registers[6];
+			printf("%s sys-write\n",currentThread->getName());
+			int pos = machine->ReadRegister(4);
+			int size = machine->ReadRegister(5);
+			OpenFile* openFile = (OpenFile*)machine->ReadRegister(6);
 			char buffer[size];
 			int data;
 			for(int i = 0; i < size; i++) {
 				machine->ReadMem(pos+i, 1, &data);
 				buffer[i] = data;
 			}
-			if (registers[6] == 1)
+			if (machine->ReadRegister(6) == ConsoleOutput)
 				printf("%s\n", buffer);
 			else
 				openFile->Write(buffer, size);
-			registers[PrevPCReg] = registers[PCReg];
-			registers[PCReg] = registers[NextPCReg];
-			registers[NextPCReg] = registers[NextPCReg] + 4;	
+			machine->PCadvance();	
 			break;
 		}
 		case SC_Read:
 		{
-			int pos = registers[4];
-			int size = registers[5];
-			OpenFile* openFile = (OpenFile*)registers[6];
+			printf("%s sys-read\n",currentThread->getName());
+			int pos = machine->ReadRegister(4);
+			int size = machine->ReadRegister(5);
+			OpenFile* openFile = (OpenFile*)machine->ReadRegister(6);
 			char buffer[size];
-			int rst = openFile->Read(buffer, size);
-			for(int i = 0; i < rst; i++)
+			int byte = openFile->Read(buffer, size);
+			for(int i = 0; i < byte; i++)
 				machine->WriteMem(pos+i, 1, (int)buffer[i]);
-			registers[2] = rst;
-			registers[PrevPCReg] = registers[PCReg];
-			registers[PCReg] = registers[NextPCReg];
-			registers[NextPCReg] = registers[NextPCReg] + 4;
+			machine->WriteRegister(2,byte);
+			machine->PCadvance();
 			break;
 		}
 		case SC_Exec:
 		{
-			// int add = registers[4];
-			// char name[20];
-			// int pos = 0;
-			// while(1) {
-			// 	int data;
-			// 	machine->ReadMem(add+pos, 1, &data);
-			// 	name[pos++] = data;
-			// 	if (data == 0) break;
-			// }
-			// Thread* t = new Thread("Exec thread");
-			// OpenFile* executable = fileSystem->Open(name);
-		 //    if (executable == NULL) {
-			// 	printf("Unable to open file %s\n", name);
-			// 	return;
-		 //    }
-			// AddrSpace* space = new AddrSpace(executable);
- 		// 	t->space = space;
-		 //    delete executable;			// close file
-   //  		space->InitRegisters();		// set the initial register values
-   //  		space->RestoreState();		// load page table register
-			// t->Fork(exec_func, 0);
-			// registers[2] = (int)space;
-			// registers[PrevPCReg] = registers[PCReg];
-			// registers[PCReg] = registers[NextPCReg];
-			// registers[NextPCReg] = registers[NextPCReg] + 4;
-			printf("exec\n");
+			printf("%s sys-exec\n",currentThread->getName());
+			int addr = machine->ReadRegister(4);
+			char name[20];
+			int pos = 0;
+			int data;
+			while(1) {
+				machine->ReadMem(addr+pos, 1, &data);
+				name[pos++] = data;
+				if (data == 0) break;
+			}
+			Thread* t = new Thread("exec-thread");
+			AddrSpace* space = new AddrSpace(name);
+ 			t->space = space;
+			t->Fork(exec_func, 0);
+			machine->WriteRegister(2,t->getThreadID());
+			machine->PCadvance();
 			 break;
 		}
 		case SC_Fork:
 		{
+			printf("%s sys-fork\n",currentThread->getName());
+			int func = machine->ReadRegister(4);
+			AddrSpace *space=new AddrSpace(currentThread->space->programName);
+			Thread *t=new Thread("fork-thread");
+			t->space=space;
+			t->Fork(fork_func,func);
+			machine->PCadvance();
 			break;
 		}
 		case SC_Yield:
 		{
+			printf("%s sys-yield\n",currentThread->getName());
+			machine->PCadvance();
+			currentThread->Yield();
 			break;
 		}
 		case SC_Join:
 		{
+			printf("%s sys-join\n",currentThread->getName());
+			int tid=machine->ReadRegister(4);
+			while(threadIDs[tid]){
+				currentThread->Yield();
+			}
+			machine->WriteRegister(2,threadIDs[tid]);
+			machine->PCadvance();
 			break;
 		}
 		case SC_Exit: 
 		{
-			printf("sys-exit\n");
+			printf("%s sys-exit\n",currentThread->getName());
 			currentThread->Finish();
 			break;
 		}
@@ -213,7 +230,7 @@ ExceptionHandler(ExceptionType which)
 			pos=-1;
 		else
 			pos=machine->RequestPage();
-		printf("pos=%d\n", pos);
+		// printf("pos=%d\n", pos);
 		if(num==0&&pos==-1){
 			printf("there are no AddrSpace to allocate for pending threads!\n\n\n");
 			currentThread->Finish();

@@ -11,10 +11,10 @@
  */
 
 #include "syscall.h"
+int f(){}
 
 int
 main()
 {
-    Exit(0);
-    /* not reached */
+    Exit(0);		/* and then we're done */
 }
