@@ -16,6 +16,7 @@
 
 
 void simple(char *filename){
+    currentThread->Yield();
     // OpenFile *executable = fileSystem->Open(filename);
     AddrSpace *space;
 
@@ -23,16 +24,16 @@ void simple(char *filename){
     // printf("Unable to open file %s\n", filename);
     // return;
     // }
-    // space = new AddrSpace(filename);    
-    // currentThread->space = space;
+    space = new AddrSpace(filename);    
+    currentThread->space = space;
 
     // delete executable;          // close file
 
-    // space->InitRegisters();     // set the initial register values
-    // space->RestoreState();      // load page table register
+    space->InitRegisters();     // set the initial register values
+    space->RestoreState();      // load page table register
     printf("%s run user program\n",currentThread->getName());
-    //machine->Run();         // jump to the user progam
-    //ASSERT(FALSE);          // machine->Run never returns;
+    machine->Run();         // jump to the user progam
+    ASSERT(FALSE);          // machine->Run never returns;
 }
 //----------------------------------------------------------------------
 // StartProcess
@@ -53,7 +54,7 @@ StartProcess(char *filename)
     fifththread->Fork(simple,filename);
 
 
-
+    currentThread->Yield();
     // OpenFile *executable = fileSystem->Open(filename);
     AddrSpace *space;
 
@@ -61,16 +62,17 @@ StartProcess(char *filename)
 	// printf("Unable to open file %s\n", filename);
 	// return;
  //    }
-    // space = new AddrSpace(filename);    
-    // currentThread->space = space;
+    space = new AddrSpace(filename);    
+    currentThread->space = space;
 
     //delete executable;			// close file
 
-    // space->InitRegisters();		// set the initial register values
-    // space->RestoreState();		// load page table register
+    space->InitRegisters();		// set the initial register values
+    space->RestoreState();		// load page table register
     printf("%s run user program\n",currentThread->getName());
-    //machine->Run();			// jump to the user progam
-    //ASSERT(FALSE);			// machine->Run never returns;
+    //currentThread->Yield();
+    machine->Run();			// jump to the user progam
+    ASSERT(FALSE);			// machine->Run never returns;
 					// the address space exits
 					// by doing the syscall "exit"
 }
