@@ -39,7 +39,7 @@ PostOffice *postOffice;
 // External definition, to allow us to take a pointer to this function
 extern void Cleanup();
 int threadIDs[MaxThread];
-
+Message messages[MaxMessage];
 //----------------------------------------------------------------------
 // TimerInterruptHandler
 // 	Interrupt handler for the timer device.  The timer device is
@@ -82,6 +82,9 @@ Initialize(int argc, char **argv)
     bool randomYield = FALSE;
     for(int i=0;i<MaxThread;i++){
         threadIDs[i]=0;
+    }
+    for(int i=0;i<MaxMessage;i++){
+        messages[i].valid=FALSE;
     }
 #ifdef USER_PROGRAM
     bool debugUserProg = FALSE;	// single step user program

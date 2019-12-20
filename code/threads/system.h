@@ -18,7 +18,10 @@
 
 //PKU OS LAB1.3	
 #define MaxThread 128
+#define MaxMessage 20
+#define MaxContent 20
 extern int threadIDs[MaxThread];
+extern Message messages[MaxMessage];
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
 						// called before anything else

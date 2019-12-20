@@ -89,3 +89,15 @@ ThreadTest()
     }
 }
 
+void receiveMessage(int which){
+    char content[MaxMessage];
+    ASSERT(currentThread->Receive(content)>0);
+    printf("%s receive \"%s\"\n",currentThread->getName(),content);
+}
+
+void MessageTest(char *content){
+    Thread *t=new Thread("forked");
+    t->Fork(receiveMessage,0);
+    ASSERT(currentThread->Send(content,t->getThreadID()));
+    printf("%s send \"%s\" to %s\n",currentThread->getName(),content,t->getName());
+}

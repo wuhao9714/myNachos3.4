@@ -60,6 +60,7 @@ extern int testnum;
 // External functions used by this file
 
 extern void ThreadTest(void), Copy(char *unixFile, char *nachosFile);
+extern void MessageTest(char *content);
 extern void Print(char *file), PerformanceTest(void);
 extern void StartProcess(char *file), ConsoleTest(char *in, char *out);
 extern void MailTest(int networkID);
@@ -89,18 +90,23 @@ main(int argc, char **argv)
 #ifdef THREADS
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
       argCount = 1;
-      switch (argv[0][1]) {
-      case 'q':
-        testnum = atoi(argv[1]);
-        argCount++;
-        break;
-      default:
-        testnum = 1;
-        break;
-      }
+      // switch (argv[0][1]) {
+      // case 'q':
+      //   testnum = atoi(argv[1]);
+      //   argCount++;
+      //   break;
+      // default:
+      //   testnum = 1;
+      //   break;
+      // }
+      if (!strcmp(*argv, "-m")) {        	// run a user program
+	    ASSERT(argc > 1);
+            MessageTest(*(argv + 1));
+            argCount = 2;
+        }
     }
 
-    ThreadTest();
+    // ThreadTest();
 #endif
 
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {

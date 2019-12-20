@@ -65,7 +65,7 @@ Thread::~Thread()
     ASSERT(this != currentThread);
     if (stack != NULL)
 	DeallocBoundedArray((char *) stack, StackSize * sizeof(int));
-    threadIDs[threadID]=0;
+    threadIDs[threadID]=-1;
 #ifdef USER_PROGRAM
     delete space;
 #endif
@@ -353,4 +353,38 @@ allocatedThreadID()
     }else{
         return -1;
     }
+}
+
+bool Thread::Send(char* content,int destination){
+    int count;
+    for(count=0;count<MaxContent;count++){
+        if(content[count]=='\0')
+            break;
+    }
+    count++;
+    ASSERT(count>1&&count<=MaxContent);
+    for(int i=0;i<MaxMessage;i++){
+        if(!messages[i].valid){
+            messages[i].valid=TRUE;
+            messages[i].destination=destination;
+            for(int j=0;j<count;j++){
+                messages[i].content[j]=content[j];
+            }
+            messages[i].count=count;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+int Thread::Receive(char *content){
+    for(int i=0;i<MaxMessage;i++){
+        if(messages[i].valid && messages[i].destination==threadID){
+            for(int j=0;j<messages[i].count;j++){
+                content[j]=messages[i].content[j];
+            }
+            return messages[i].count;
+        }
+    }
+    return 0;
 }

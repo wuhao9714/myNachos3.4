@@ -63,6 +63,13 @@ enum ThreadStatus { JUST_CREATED, RUNNING, READY, BLOCKED };
 extern void ThreadPrint(int arg);	 
 int allocatedThreadID();
 
+class Message{
+    public:
+    int count;
+    bool valid;
+    int destination;
+    char content[20];
+};
 // The following class defines a "thread control block" -- which
 // represents a single thread of execution.
 //
@@ -105,6 +112,8 @@ class Thread {
     void Print() { printf("%s, ", name); }
     int getUserID();
     int getThreadID();
+    bool Send(char *content,int destination);
+    int Receive(char *content);
   private:
     // some of the private data for this class is listed above
     
