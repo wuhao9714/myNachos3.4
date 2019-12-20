@@ -18,6 +18,7 @@
 
 //PKU OS LAB1.3	
 #define MaxThread 128
+extern int blockedNum;
 extern int threadIDs[MaxThread];
 extern Thread *threadPointers[MaxThread];
 extern int allocatedThreadID();

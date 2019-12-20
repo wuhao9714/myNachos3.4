@@ -12,10 +12,13 @@
 #include "copyright.h"
 #include "system.h"
 #include "elevatortest.h"
+#include "synch.h"
 
 // testnum is set in main.cc
 int testnum = 1;
 
+Semaphore *r1=new Semaphore("resource1",1);
+Semaphore *r2=new Semaphore("resource2",1);
 //----------------------------------------------------------------------
 // SimpleThread
 // 	Loop 5 times, yielding the CPU to another ready thread 
@@ -133,6 +136,37 @@ ThreadTest4()
     SimpleThread2(5);
 }
 
+void
+func(int which){
+    printf("%s try to get %s\n", currentThread->getName(),r2->getName());
+    r2->P();
+    printf("%s have gotten %s\n", currentThread->getName(),r2->getName());
+
+    printf("%s try to get %s\n", currentThread->getName(),r1->getName());
+    r1->P();
+    printf("%s have gotten %s\n", currentThread->getName(),r1->getName());
+
+    r2->V();
+    r1->V();
+}
+
+void 
+ThreadTest5(){
+    printf("%s try to get %s\n", currentThread->getName(),r1->getName());
+    r1->P();
+    printf("%s have gotten %s\n", currentThread->getName(),r1->getName());
+
+    Thread *t=new Thread("fork",4);
+    printf("%s have been created\n", t->getName());
+    t->Fork(func,0);
+
+    printf("%s try to get %s\n", currentThread->getName(),r2->getName());
+    r2->P();
+    printf("%s have gotten %s\n", currentThread->getName(),r2->getName());
+
+    r1->V();
+    r2->V();
+}
 //----------------------------------------------------------------------
 // ThreadTest
 // 	Invoke a test routine.
@@ -153,6 +187,9 @@ ThreadTest()
     break;
     case 4:
     ThreadTest4();
+    break;
+    case 5:
+    ThreadTest5();
     break;
     default:
 	printf("No test specified.\n");

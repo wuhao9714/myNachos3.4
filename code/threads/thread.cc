@@ -33,7 +33,7 @@ char* ThreadStatusInChar[]={"JUST_CREATED","RUNNING","READY","BLOCKED"};
 //	"threadName" is an arbitrary string, useful for debugging.
 //----------------------------------------------------------------------
 
-Thread::Thread(char* threadName,int p=8)
+Thread::Thread(char* threadName,int p=6)
 {
     name = threadName;
     stackTop = NULL;
@@ -236,6 +236,7 @@ Thread::Sleep ()
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
 
     status = BLOCKED;
+    blockedNum++;
     while ((nextThread = scheduler->FindNextToRun()) == NULL)
 	interrupt->Idle();	// no one to run, wait for an interrupt
         

@@ -39,6 +39,7 @@ PostOffice *postOffice;
 // External definition, to allow us to take a pointer to this function
 extern void Cleanup();
 
+int blockedNum;
 int threadIDs[MaxThread];
 Thread *threadPointers[MaxThread];
 int
@@ -74,6 +75,12 @@ allThreadInfo(){
             threadPointers[i]->printThreadInfo();
         }
     }
+}
+
+void
+balance(){
+    if(blockedNum>=2)
+        printf("\n%s:A deadlock currently exists\n\n",currentThread->getName());
 }
 //----------------------------------------------------------------------
 // TimerInterruptHandler
@@ -115,6 +122,7 @@ Initialize(int argc, char **argv)
     int argCount;
     char* debugArgs = "";
     bool randomYield = FALSE;
+    blockedNum=0;
     for(int i=0;i<MaxThread;i++){
         threadIDs[i]=0;
         threadPointers[i]=NULL;
@@ -181,6 +189,8 @@ Initialize(int argc, char **argv)
     // object to save its state. 
     currentThread = new Thread("main");		
     currentThread->setStatus(RUNNING);
+    Thread *t=new Thread("balance-set-manager",8);
+    t->Fork(balance,0);
 
     interrupt->Enable();
     CallOnUserAbort(Cleanup);			// if user hits ctl-C

@@ -84,7 +84,7 @@ class Thread {
     int threadID;
     int priority;
   public:
-    Thread(char* debugName,int p=8);		// initialize a Thread 
+    Thread(char* debugName,int p=6);		// initialize a Thread 
     ~Thread(); 				// deallocate a Thread
 					// NOTE -- thread being deleted
 					// must not be running when delete 
@@ -107,6 +107,7 @@ class Thread {
     int getUserID(){return userID;}
     int getThreadID(){return threadID;}
     char* getStatus(){return (ThreadStatusInChar[status]);}
+    ThreadStatus getstatus(){return status;}
     void printThreadInfo();
     int getPriority(){return priority;}
   private:
