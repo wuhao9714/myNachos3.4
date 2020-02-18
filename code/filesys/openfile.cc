@@ -155,10 +155,20 @@ OpenFile::WriteAt(char *from, int numBytes, int position)
     bool firstAligned, lastAligned;
     char *buf;
 
-    if ((numBytes <= 0) || (position >= fileLength))
-	return 0;				// check request
-    if ((position + numBytes) > fileLength)
-	numBytes = fileLength - position;
+    if (numBytes <= 0)
+	   return 0;				// check request
+    if ((position + numBytes) > fileLength){
+        OpenFile* freeMapFile=new OpenFile(0);
+        BitMap* freeMap=new BitMap(NumSectors);
+        freeMap->FetchFrom(freeMapFile);
+        if(!hdr->Extend(freeMap,position+numBytes-fileLength))
+            return 0;
+        hdr->WriteBack(hdr->sector_position);
+        freeMap->WriteBack(freeMapFile);
+        delete freeMap;
+        delete freeMapFile;
+    }
+
     DEBUG('f', "Writing %d bytes at %d, from file of length %d.\n", 	
 			numBytes, position, fileLength);
 

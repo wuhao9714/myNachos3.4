@@ -62,6 +62,38 @@ FileHeader::Allocate(BitMap *freeMap, int fileSize)
     return TRUE;
 }
 
+bool 
+FileHeader::Extend(BitMap *freeMap,int bytes){
+    numBytes=numBytes+bytes;
+    int initial_sector=numSectors;
+    numSectors=divRoundUp(numBytes,SectorSize);
+    if(initial_sector==numSectors)
+        return TRUE;
+    if(freeMap->NumClear()<numSectors - initial_sector)
+        return FALSE;
+    if(initial_sector <= NumDirect-1){
+        if(numSectors <= NumDirect-1){
+            for(int i =initial_sector;i<numSectors;i++)
+                dataSectors[i]=freeMap->Find();
+        }
+        else{
+            for(int i =initial_sector;i<=NumDirect-1;i++)
+                dataSectors[i]=freeMap->Find();
+            char indirect_index[SectorSize];
+            for(int i=0;i<numSectors-NumDirect+1;i++)
+                ((int*)indirect_index)[i]=freeMap->Find();
+            synchDisk->WriteSector(dataSectors[NumDirect-1],indirect_index);
+        }
+    }
+    else{
+        char *indirect_index=new char[SectorSize];
+        synchDisk->ReadSector(dataSectors[NumDirect-1],indirect_index);
+        for(int i=initial_sector;i<numSectors;i++)
+            ((int*)indirect_index)[i-NumDirect+1]=freeMap->Find();
+        synchDisk->WriteSector(dataSectors[NumDirect-1],indirect_index);
+    }
+    return TRUE;
+}
 //----------------------------------------------------------------------
 // FileHeader::Deallocate
 // 	De-allocate all the space allocated for data blocks for this file.
