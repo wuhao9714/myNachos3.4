@@ -86,13 +86,16 @@ main(int argc, char **argv)
 
     DEBUG('t', "Entering main");
     (void) Initialize(argc, argv);
+
+    int ac=argc;
+    char** av=argv;
     
 #ifdef THREADS
-    for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
+    for (ac--, av++; ac > 0; ac -= argCount, av += argCount) {
       argCount = 1;
-      switch (argv[0][1]) {
+      switch (av[0][1]) {
       case 'q':
-        testnum = atoi(argv[1]);
+        testnum = atoi(av[1]);
         argCount++;
         break;
       default:
@@ -101,7 +104,7 @@ main(int argc, char **argv)
       }
     }
 
-    ThreadTest();
+    //ThreadTest();
 #endif
 
     for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
@@ -145,6 +148,9 @@ main(int argc, char **argv)
             fileSystem->Print();
 	} else if (!strcmp(*argv, "-t")) {	// performance test
             PerformanceTest();
+	} else if(!strcmp(*argv, "-cd")){
+		ASSERT(argc > 1);
+		fileSystem->Create(*(argv + 1),-1);
 	}
 #endif // FILESYS
 #ifdef NETWORK

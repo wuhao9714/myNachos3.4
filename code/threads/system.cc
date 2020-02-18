@@ -154,6 +154,7 @@ Initialize(int argc, char **argv)
 #endif
 
 #ifdef FILESYS
+    if(format) remove("../filesys/DISK");
     synchDisk = new SynchDisk("DISK");
 #endif
 
