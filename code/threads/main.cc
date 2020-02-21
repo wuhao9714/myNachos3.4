@@ -60,7 +60,7 @@ extern int testnum;
 // External functions used by this file
 
 extern void ThreadTest(void), Copy(char *unixFile, char *nachosFile);
-extern void Print(char *file), PerformanceTest(void);
+extern void Print(char *file), PerformanceTest(void),PerformanceTest2(void),PerformanceTest3(void);
 extern void StartProcess(char *file), ConsoleTest(char *in, char *out);
 extern void MailTest(int networkID);
 
@@ -148,7 +148,11 @@ main(int argc, char **argv)
             fileSystem->Print();
 	} else if (!strcmp(*argv, "-t")) {	// performance test
             PerformanceTest();
-	} else if(!strcmp(*argv, "-cd")){
+    }  else if (!strcmp(*argv, "-t2")) {	// performance test
+            PerformanceTest2();
+	} else if (!strcmp(*argv, "-t3")) {	// performance test
+            PerformanceTest3();
+	}else if(!strcmp(*argv, "-cd")){
 		ASSERT(argc > 1);
 		fileSystem->Create(*(argv + 1),-1);
 	}

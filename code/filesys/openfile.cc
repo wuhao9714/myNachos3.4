@@ -32,6 +32,7 @@ OpenFile::OpenFile(int sector)
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
     seekPosition = 0;
+    synchDisk->numVisitors[sector]++;
 }
 
 //----------------------------------------------------------------------
@@ -41,6 +42,7 @@ OpenFile::OpenFile(int sector)
 
 OpenFile::~OpenFile()
 {
+    synchDisk->numVisitors[hdr->sector_position]--;
     delete hdr;
 }
 
@@ -74,16 +76,20 @@ OpenFile::Seek(int position)
 int
 OpenFile::Read(char *into, int numBytes)
 {
+    synchDisk->PlusReader(hdr->sector_position);
    int result = ReadAt(into, numBytes, seekPosition);
    seekPosition += result;
+   synchDisk->MinusReader(hdr->sector_position);
    return result;
 }
 
 int
 OpenFile::Write(char *into, int numBytes)
 {
+    synchDisk->BeginWrite(hdr->sector_position);
    int result = WriteAt(into, numBytes, seekPosition);
    seekPosition += result;
+   synchDisk->EndWrite(hdr->sector_position);
    return result;
 }
 
@@ -134,7 +140,6 @@ OpenFile::ReadAt(char *into, int numBytes, int position)
     // read in all the full and partial sectors that we need
     buf = new char[numSectors * SectorSize];
     for (i = firstSector; i <= lastSector; i++)	{
-        //printf("%d\n",hdr->ByteToSector(i * SectorSize));
         synchDisk->ReadSector(hdr->ByteToSector(i * SectorSize), 
 					&buf[(i - firstSector) * SectorSize]);
     }

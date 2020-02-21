@@ -50,7 +50,7 @@
 #include "directory.h"
 #include "filehdr.h"
 #include "filesys.h"
-
+#include "system.h"
 #include <string.h>
 // Sectors containing the file headers for the bitmap of free sectors,
 // and the directory of files.  These file headers are placed in well-known 
@@ -186,7 +186,6 @@ FileSystem::Create(char *name, int initialSize)
 
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
-
  //    if (directory->Find(name) != -1)
  //      success = FALSE;			// file is already in directory
  //    else {	
@@ -357,8 +356,9 @@ FileSystem::Open(char *name)
     sector=directory->Find(file_name);
     if(sector<0)
         return NULL;
-    openFile=new OpenFile(sector);
     delete directory;
+    delete openFile;
+    openFile=new OpenFile(sector);
     return openFile;				// return NULL if not found
 }
 
@@ -383,7 +383,7 @@ FileSystem::Remove(char *name)
     BitMap *freeMap;
     FileHeader *fileHdr;
     int sector;
-    
+    // printf("d%d\n", synchDisk->numVisitors[7]);
     directory = new Directory(NumDirEntries);
     directory->FetchFrom(directoryFile);
     // sector = directory->Find(name);
@@ -407,7 +407,6 @@ FileSystem::Remove(char *name)
     // delete directory;
     // delete freeMap;
     // return TRUE;
-
     int name_sector=directory->FindDir(name);
     if(name_sector==-1) return FALSE;
     OpenFile *name_dir=new OpenFile(name_sector);
@@ -432,7 +431,6 @@ FileSystem::Remove(char *name)
        delete directory;
        return FALSE;          // file not found 
     }
-
     if(directory->GetType(file_name)==0){
         Directory *current_directory=new Directory(NumDirEntries);
         OpenFile *current_openFile=new OpenFile(sector);
@@ -443,6 +441,11 @@ FileSystem::Remove(char *name)
         }
         delete current_directory;
         delete current_openFile;
+    }
+    if(synchDisk->numVisitors[sector]){
+        printf("unable to remove the file,there are still %d visitor(s)\n",
+            synchDisk->numVisitors[sector]);
+        return FALSE;
     }
     fileHdr = new FileHeader;
     fileHdr->FetchFrom(sector);

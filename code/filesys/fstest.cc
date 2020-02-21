@@ -150,7 +150,6 @@ FileRead()
 
     printf("Sequential read of %d byte file, in %d byte chunks\n", 
 	FileSize, ContentSize);
-
     if ((openFile = fileSystem->Open(FileName)) == NULL) {
 	printf("Perf test: unable to open file %s\n", FileName);
 	delete [] buffer;
@@ -181,5 +180,104 @@ PerformanceTest()
       return;
     }
     stats->Print();
+}
+
+
+void 
+write()
+{
+    OpenFile *openFile;    
+    int i, numBytes;
+
+    if (!fileSystem->Create(FileName, 0)) {
+      printf("Perf test: can't create %s\n", FileName);
+      return;
+    }
+    openFile = fileSystem->Open(FileName);
+    if (openFile == NULL) {
+    printf("Perf test: unable to open %s\n", FileName);
+    return;
+    }
+
+    // currentThread->Yield();
+
+    printf("begin writing\n");
+    numBytes = openFile->Write(Contents, ContentSize);
+    printf("end writing\n");
+
+    delete openFile;    // close file
+}
+
+void
+read(int which){
+    printf("%s start\n", currentThread->getName());
+    OpenFile *openFile;    
+    char *buffer = new char[ContentSize+1];
+    int i, numBytes;
+
+    if ((openFile = fileSystem->Open(FileName)) == NULL) {
+    printf("Perf test: unable to open file %s\n", FileName);
+    delete [] buffer;
+    return;
+    }
+    printf("begin reading\n");
+    printf("%s's size is %d\n", FileName,openFile->Length());
+    numBytes = openFile->Read(buffer, ContentSize);
+    printf("read %d bytes\n", numBytes);
+    buffer[ContentSize]='\0';
+    printf("read content : %s\n", buffer);
+    printf("end reading\n");
+    delete [] buffer;
+    delete openFile;    // close file
+
+    if (!fileSystem->Remove(FileName)) {
+      printf("Perf test: unable to remove %s\n", FileName);
+      return;
+    }
+}
+
+void
+PerformanceTest2()
+{
+    printf("Starting file system performance test:\n");
+    Thread* reader=new Thread("reader");
+    reader->Fork(read,0);
+    write();
+}
+
+void
+remove(int which){
+    printf("%s begin removing\n", currentThread->getName());
+    fileSystem->Remove(FileName);
+}
+
+void
+PerformanceTest3()
+{
+    printf("Starting file system performance test:\n");
+    
+    OpenFile *openFile;    
+    int i, numBytes;
+
+    if (!fileSystem->Create(FileName, 0)) {
+      printf("Perf test: can't create %s\n", FileName);
+      return;
+    }
+    openFile = fileSystem->Open(FileName);
+    if (openFile == NULL) {
+    printf("Perf test: unable to open %s\n", FileName);
+    return;
+    }
+    Thread* remove1=new Thread("remove1");
+    remove1->Fork(remove,0);
+
+    printf("begin writing\n");
+    
+    currentThread->Yield();
+    
+    numBytes = openFile->Write(Contents, ContentSize);
+    printf("end writing\n");
+
+    delete openFile;    // close file
 }
 
