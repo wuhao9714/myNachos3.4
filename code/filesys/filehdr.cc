@@ -43,21 +43,42 @@ bool
 FileHeader::Allocate(BitMap *freeMap, int fileSize)
 { 
     numBytes = fileSize;
-    numSectors  = divRoundUp(fileSize, SectorSize);
-    if (freeMap->NumClear() < numSectors + 1)
-	return FALSE;		// not enough space
+    numSectors  = divRoundUp(fileSize, SectorSize);		
+    
     if(numSectors<=NumDirect-1){
-        for (int i = 0; i < numSectors; i++)
-            dataSectors[i] = freeMap->Find();
+        if (freeMap->NumClear() < numSectors)
+            return FALSE;
+        int first_free=freeMap->Find2(numSectors);
+        if(first_free!=-1)
+            for (int i = 0; i < numSectors; i++)
+                dataSectors[i] = first_free+i;
+        else
+            for (int i = 0; i < numSectors; i++)
+                dataSectors[i] = freeMap->Find();
     }
     else{
-        for(int i=0;i<NumDirect-1;i++)
-            dataSectors[i] = freeMap->Find();
-        dataSectors[NumDirect-1]=freeMap->Find();
-        char indirect_index[SectorSize];
-        for(int i=0;i<numSectors-NumDirect+1;i++)
-            ((int*)indirect_index)[i]=freeMap->Find();
-        synchDisk->WriteSector(dataSectors[NumDirect-1],indirect_index);
+        if (freeMap->NumClear() < numSectors + 1)
+            return FALSE;
+        int first_free=freeMap->Find2(numSectors);
+        if(first_free!=-1){
+            int i;
+            for(i=0;i<NumDirect-1;i++)
+                dataSectors[i] = first_free+i;
+            dataSectors[NumDirect-1]=freeMap->Find();
+            char indirect_index[SectorSize];
+            for(int j=0;j<numSectors-NumDirect+1;j++,i++)
+                ((int*)indirect_index)[j]=first_free+i;
+            synchDisk->WriteSector(dataSectors[NumDirect-1],indirect_index);
+        }
+        else{
+            for(int i=0;i<NumDirect-1;i++)
+                dataSectors[i] = freeMap->Find();
+            dataSectors[NumDirect-1]=freeMap->Find();
+            char indirect_index[SectorSize];
+            for(int i=0;i<numSectors-NumDirect+1;i++)
+                ((int*)indirect_index)[i]=freeMap->Find();
+            synchDisk->WriteSector(dataSectors[NumDirect-1],indirect_index);
+        }
     }
     return TRUE;
 }

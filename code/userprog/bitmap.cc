@@ -102,6 +102,20 @@ BitMap::Find()
     return -1;
 }
 
+int 
+BitMap::Find2(int num){
+    for(int i=0;i<numBits;i++){
+        int flag=1;
+        for(int j=0;j<num;j++)
+            if(Test(i+j)) flag=0;
+        if(flag){
+            for(int j=0;j<num;j++)
+                Mark(i+j);
+            return i;
+        }
+    }
+    return -1;
+}
 //----------------------------------------------------------------------
 // BitMap::NumClear
 // 	Return the number of clear bits in the bitmap.
