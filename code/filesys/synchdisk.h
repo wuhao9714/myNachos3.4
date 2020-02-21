@@ -14,6 +14,15 @@
 #include "disk.h"
 #include "synch.h"
 
+#define CacheNum 4
+class Cache{
+public:
+    int valid;
+    int dirty;
+    int sector;
+    int lru_time;
+    char data[SectorSize];
+};
 // The following class defines a "synchronous" disk abstraction.
 // As with other I/O devices, the raw physical disk is an asynchronous device --
 // requests to read or write portions of the disk return immediately,
@@ -57,6 +66,7 @@ class SynchDisk {
     Semaphore *mutex[NumSectors];
     int numReaders[NumSectors];
     Lock *readerLock;
+    Cache *cache[CacheNum];
 };
 
 #endif // SYNCHDISK_H

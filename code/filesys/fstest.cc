@@ -281,3 +281,39 @@ PerformanceTest3()
     delete openFile;    // close file
 }
 
+#define PIPE    "PIPE"
+#define MaxPipeSize SectorSize
+void
+PipeWrite(int which){
+    OpenFile *pipefile=fileSystem->Open(PIPE);
+    char *buffer=new char[MaxPipeSize];
+    int size;
+    printf("input to %s : \n", PIPE);
+    getline(&buffer,&size,stdin);
+    pipefile->Write(buffer,size);
+    delete [] buffer;
+    delete pipefile;
+}
+
+void
+PipeRead(int which){
+    OpenFile *pipefile=fileSystem->Open(PIPE);
+    char *buffer=new char[MaxPipeSize];
+    pipefile->Read(buffer,pipefile->Length());
+    buffer[pipefile->Length()]='\0';
+    printf("output form %s : \n%s\n",PIPE,buffer);
+    delete [] buffer;
+    delete pipefile;
+}
+
+void
+Pipe(){
+    if (!fileSystem->Create(PIPE, MaxPipeSize)) {
+      printf("Perf test: can't create %s\n", FileName);
+      return;
+    }
+    Thread* pipewrite=new Thread("pipewrite");
+    Thread* piperead=new Thread("piperead");
+    pipewrite->Fork(PipeWrite,0);
+    piperead->Fork(PipeRead,0);
+}
