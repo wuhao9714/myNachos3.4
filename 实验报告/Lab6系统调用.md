@@ -47,7 +47,7 @@
 
 
 
-**code/userprog/syscall.h：**定义了nachos的系统调用，包括系统调用号和系统调用函数的声明。包括已经实现了的Halt()在内的系统调用一共有11个。其余未实现的10个分别是：
+**code/userprog/syscall.h:** 定义了nachos的系统调用，包括系统调用号和系统调用函数的声明。包括已经实现了的Halt()在内的系统调用一共有11个。其余未实现的10个分别是：
 
 > 涉及地址空间的：1. void Exit(int status);用户程序结束时调用，status=0表示正常退出。2. SpaceId Exec(char \*name);加载执行名字是name的Nachos可执行文件，返回地址空间ID。3. int Join(SpaceId id);等待标识符是id的用户线程执行完毕，返回退出状态。
 >
@@ -56,9 +56,9 @@
 > 涉及用户级线程的：1. void Fork(void (\*func)());创建运行func函数的线程，其与当前线程拥有相同地址空间。2. void Yield();让出CPU。
 >
 
-**code/userprog/exception.c：**定义了异常处理函数void ExceptionHandler(ExceptionType which)，根据which的不同，执行不同的处理流程。
+**code/userprog/exception.c:** 定义了异常处理函数void ExceptionHandler(ExceptionType which)，根据which的不同，执行不同的处理流程。
 
-**code/test/start.s：**辅助用户程序运行的汇编语言。\_\_start函数调用了用户程序的main函数。如果main函数返回了，就调用Exit函数退出当前进程。系统调用部分是将的调用号存放到r2寄存器中，然后通过syscall指令陷入内核，交给内核处理。
+**code/test/start.s:** 辅助用户程序运行的汇编语言。\_\_start函数调用了用户程序的main函数。如果main函数返回了，就调用Exit函数退出当前进程。系统调用部分是将的调用号存放到r2寄存器中，然后通过syscall指令陷入内核，交给内核处理。
 
 
 
