@@ -117,5 +117,5 @@
 
 
 
-[友情链接]: https://github.com/wsxst/MyNachos4.1	"朋友的Nachos4.1学习笔记"
+**友情链接：[朋友的Nachos4.1学习笔记](https://github.com/wsxst/MyNachos4.1)**
 
