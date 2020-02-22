@@ -1,365 +1,121 @@
-This README file describes the Nachos release.  Comments, questions,
-and bug reports are always welcome, and can be directed to 
-nachos@cs.berkeley.edu (for now, an alias to just me, Tom Anderson), or 
-to the alt.os.nachos newsgroup.
-
-Nachos is instructional software for teaching undergraduate, and potentially
-graduate, level operating systems courses.  The Nachos distribution
-comes with: 
-
-   an overview paper
-   simple baseline code for a working operating system
-   a simulator for a generic personal computer/workstation
-   sample assignments
-   a C++ primer (Nachos is written in an easy-to-learn subset of C++, 
-     and the primer helps teach C programmers our subset)
-
-The assignments illustrate and explore all areas of modern operating
-systems, including threads and concurrency, multiprogramming, 
-system calls, virtual memory, software-loaded TLB's, file systems, 
-network protocols, remote procedure call, and distributed systems.
-
-The most up to date version of nachos is linked to the file called, 
-nachos.tar.Z.  On Jan. 20, 1993, this version was nachos-3.1.tar.Z,
-but it will be periodically updated as bugs are fixed and features added.
-REMEMBER TO TURN BINARY MODE ON WHEN RETRIEVING .Z FILES.
-
-To get started, you should:
-  1. use ftp to fetch the nachos.tar.Z file (turning on binary mode first)
-  2. uncompress nachos.tar.Z
-  3. tar -xf nachos.tar
-  4. lpr nachos.ps  -- print out the paper describing nachos
-  5. lpr doc/*.ps  -- print out the sample assignments
-  6. cd code; make print -- print out the nachos source code
-  7. cd code/c++example; lpr *.ps *.h *.cc -- print out C++ primer
-  8. if you have no DEC MIPS workstations available at your site, you 
-      will need to install the gcc cross-compiler on your system.  See
-      the instructions at the end of this file.
-  9. edit code/Makefile.dep to specify host machine type 
-     if cross-compiling (cf. step 8) you also need to:
-        edit code/test/Makefile and code/bin/Makefile
-  10. cd code; make all -- compile nachos source code
-
-Version 3 has been used for a semester at Berkeley by over a 
-hundred students, so most of the bugs are out of the system.
-However, there are likely to be some remaining problems; if you
-find these, please send e-mail to nachos@cs.berkeley.edu (particularly
-if you have a fix :-).
-
-At present, Nachos runs on several platforms, including: 
-  DEC MIPS, running Ultrix
-  SUN SPARCstations (only tested on SunOS, not Solaris, though)
-  HP PA-RISC, running HP-UX
-  386 boxes, running 386BSD UNIX or FreeBSD
-
-Notably we do not currently support:
-  PC Windows 
-  Macintosh
-  non-SPARC SUN workstations
-However, PC and Macintosh support is under development.  The main change
-that you need to make to support another platform is an implementation
-of the low-level machine-dependent context switch code, in threads/switch.s.
-Several example architectures are now supported in switch.s.
-
-The basic Nachos system was written for a MIPS workstation.  It has
-been ported to other platforms, but as of now, there are a few gotchas.
-The Nachos kernel and machine simulator run directly on the host machine,
-but user-level programs running on top of Nachos are simulated instruction-by-
-instruction.  The simulator assumes MIPS object code, in little endian format.
-It would take much more work to complete the port and change the CPU 
-simulator to simulate other instruction sets (although this is under
-investigation).  Keeping the MIPS CPU causes a few problems:
-
-1) You have to generate user-level code for the simulated machine.
-If you have a heterogeneous environment with some MIPS and non-MIPS 
-workstations, this isn't so hard -- students only need to compile a few 
-small user programs.  But if you only have non-MIPS machines, you need to 
-get gcc to cross-compile to the DEC MIPS.  Gcc only recently has been fixed 
-to support this, and the instructions for how to do this are listed below.
-If you are unable to get the cross-compiler to work, do not despair.
-The distribution comes with a few simple user programs (pre-compiled to
-MIPS object code) that students can use to test out Nachos kernel services.
-
-2) The Nachos kernel runs runs native mode while the user programs
-runs on the simulated CPU.  This is a little weird on the non-MIPS workstations
-because the user programs are using little endian (typically) and the kernel is
-using big endian.  Some information (such as the argv[] array) that
-is passed between the kernel and the user though user memory must be
-byte swapped.  (Unfortunately, this isn't as easy to fix as simply
-cross-compiling to the SGI MIPS, which is big endian; in a few places,
-the simulation assumes little endian format.  We're working on fixing this.) 
-
-The end of this file contains the procedure for constructing a cross-compiler
-to the MIPS, using the gcc toolkit.
-
-Version 3.1 Release Notes
---------------------------
-
-Primarily, fixed up problems with cross-compiled environment.
-
-
-Version 3 Release Notes
------------------------
-
-Note that version 2 is still available, in 
-  ftp.cs.berkeley.edu:ucb/nachos/version2
-
-
-There are several major changes for version 3, relative to earlier versions:
-
-1. Extensive comments.  All procedures and data structures now have
-  commented explanations.  Hopefully, this will help make it easier for
-  students (and professors) to read and understand the baseline system.
-  In writing the comments, I realized that we continue to lack an "overall" 
-  roadmap to the system; Nachos deals with conceptually hard issues
-  in a bunch of places in the code, and I think students would find a roadmap
-  helpful.  I am plotting how to do this; for now, my apologies for 
-  anything that seems unduly complex and opaque.  Any suggestions
-  for places that need better explanations are welcome.
-
-2. Modifications to improve portability, along with ports to several more
-  platforms.  All machine dependencies are now isolated into only a few 
-  locations (primarily, switch.h/switch.s, and sysdep.h/sysdep.cc), making
-  it much easier to port Nachos to new platforms.  This is evidenced by
-  the fact that the HP PA-RISC and 386UNIX ports were each completed in a
-  few days worth of concentrated effort.  There is now a common code base,
-  so the separate code base for SPARCs in Version 2 is no longer needed.
-
-3. The directory structure has been simplified and made more generic.
-  Instead of directories named for the assignments that I give, I have
-  named them after topic areas: threads, userprog, vm, filesys, and network.
-  Each represents a single assignment, but there is a large amount
-  of flexibility now in choosing the order to cover these topics.
-  Here is the dependency graph:
-
-  threads -> userprog -> vm
-	  -> filesys
-	  -> network
-
-  In other words, all other assignments rely on you covering threads first, 
-  but the next assignment after that could be either multiprogramming,
-  the file system, or network support.  The only other constraint is that
-  the virtual memory stuff relies on the user programming assignment
-  being completed [NOTE however that we provide no code for the virtual
-  memory assignment, so it could be easily folded into the userprog 
-  assignment.]
-
-  Also, the userprog and vm assignments rely on there being a file system
-  to fetch executables and to serve as backing store for virtual memory pages.
-  A "stub" version of the file system is provided to allow these assignments
-  to be done first; the stub version is not needed if file systems
-  are covered before user programming and virtual memory.
-
-4. More extensive options with respect to the sample assignments.
-  I have now three semesters of experience in teaching with Nachos.
-  My assignments have varied slightly from semester to semester, and
-  I have now compiled all of these versions into the sample assignments
-  [with comments as to which portions I assigned in any given semester].
-  The expectation is that you will subset the portion that you find most
-  interesting; if you have suggestions for what I might include in the
-  sample assignments, I would be happy to hear them.  Hopefully, from 
-  this point on, any changes to the sample assignments will only be to add 
-  further options.
-
-  Over the long term, it seems to me we will each need to vary the
-  assignments, to prevent widespread sharing of solution sets.
-
-5. Support for a software-loaded Translation Lookaside Buffer.  This
-  can be disabled (turning the machine simulation back to using simple
-  linear page tables) for those who want to avoid the added complexity,
-  but it is a feature of many modern architectures, and I think it
-  is a good illustration of caching issues.  This is the only substantive
-  change for this version.
-
-  One advantage is that it allows a *lot* more flexibility in the 
-  VM assignment -- for instance, a student could build a flat one-level 
-  page table, segmentation plus paging, an inverted page table, etc.  
-  This is all without modifying the hardware emulation.  Also, this could 
-  also lead to issues such as shared memory segments between address spaces,
-  which couldn't be supported in the current model.
-
-  One consequence is that there are now a new object code format for
-  Nachos user programs.  The standard UNIX format, COFF, is way too 
-  complicated.  I have a simplified format, NOFF (Nachos Object Format),
-  which simply identifies the code, data, and bss segments.  By default, 
-  these segments are concatenated together (as in earlier versions of
-  Nachos), beginning at location 0, but with the software loaded TLB,
-  you have the flexibility to do something smarter.
-
-  The converter from COFF to NOFF has been ported to run on all of the
-  supported machines.
-
-
-Future plans:
-
-1. Known bugs 
-    a. Nachos has a memory leak that causes it to increase its 
-       virtual memory size over time, even if Nachos is not doing anything. 
-
-2. Planned ports (other suggestions welcome):
-    a. M/S Windows (somewhere between Jan and June 94)
-    b. Macintosh (ditto)
-    c. DEC Alpha (as soon as it gets a reliable g++)
-
-3. Nachos user's guide and roadmap (not under development yet, so 
-     definite target date.  Maybe end of summer 94)
-  This would come in two parts -- first, a student guide that
-  would walk students through the baseline code, explaining how
-  the system works, and also to explain a bit of the underlying machine 
-  emulation.  At Berkeley, we devote about an hour per week in section 
-  to going through the code, but it would be helpful (particularly for 
-  those schools without discussion sections) to have this written down.
-  I've found in all three semesters I've taught the course that students really 
-  do end up repeating many of the same questions.
-
-  The second part would be an instructor's guide -- how do you
-  get Nachos up and running on various systems, how the internals
-  of the machine emulation work, how much time each of the assignments
-  takes, etc.  
-
-  The result would replace the existing sample assignments with 
-  something more helpful. 
-  (The downside is that some parts of Nachos build on other parts,
-  so I have to be clear about these dependencies.)
-
-4. New development -- this is in semi-priority order.
-
-a. Modify the network simulation to be performance accurate, by
-   using Chandy-Misra conservative simulation techniques to
-   keep the clocks on each simulated Nachos machine in sync.  
-   I have a prototype implementation of this, so this isn't all that 
-   difficult.  I'll make sure to leave an option to disable this, to go back
-   to the way the simulation works now, for backward compatibility.
-
-b. Modify the file system to do write ahead logging for reliability.
-   I talk about transactions in my class, and having example code
-   would be really useful, at least for me.  Again, I have a prototype 
-   implementation of this, and I'll make sure that it can be disabled.
-
-c. Write an RPC stub generator (actually, simplify the one used in Mach,
-   and convert it to generate Nachos network messages).  I think
-   the students would get a lot out of seeing a working RPC system,
-   and I think I can do this in a way that would be simple enough
-   for most students to easily understand.  As it stands, I have
-   the feeling most of my students don't understand the mechanics of
-   setting up an RPC connection, which at present, I can only describe
-   verbally.
-
-   At first, I'm likely to do only a C-to-C stub generator, rather
-   than a C++ stub generator.  Although the latter would obviously fit 
-   into Nachos better, it's also harder!
-
-d. Modify Nachos to insert interrupts at arbitrary points in the code.
-   Currently, interrupts (such as timer expiring) only occur when 
-   Nachos is executing user-level code, or when the Nachos kernel calls
-   the enable interrupt routine.  A different (better?) approach would
-   be to check for interrupts on every procedure entry within the Nachos
-   kernel; we could do this by modifying the compiler-inserted "mcount" 
-   routine for performance profiling.
-
-Again, comments on how to improve Nachos are always welcome.
-
-Tom Anderson
-tea@cs.berkeley.edu
-nachos@cs.berkeley.edu
-
-
-
-Building a gcc cross-compiler
------------------------------
-The gcc distribution has fairly good documentation on how to do this,
-but since I walked through it, I figured I would just give you a recipe.
-The following works from the SPARC to the DEC MIPS; if you want a 
-cross-compiler to a different platform (eg, the HP Snakes), you'll need
-to just alter this procedure slightly.
-
-NOTE: we don't need the full cross-compiled environment.  In particular,
-Nachos user programs include none of the standard UNIX library or system
-call stubs, and it assumes its own crt.s (assembly language assist for
-starting a program running).  This makes this significantly simpler,
-and it vastly reduces the size of (and overall simplifies) the resulting 
-object code.
-
-# To build a cross-compiler using the gnu tools:
-
-# grab the tools via anonymous ftp
-% ftp prep.ai.mit.edu
-
- ftp> cd /pub/gnu
-# REMEMBER TO SET BINARY MODE
- ftp> binary
-# get gcc, binutils, gas -- these or later versions
- ftp> get gcc-2.4.5.tar.gz	
- ftp> get binutils-2.2.1.tar.gz
- ftp> get gas-2.1.1.tar.gz
- ftp> quit
-
-# gunzip decompresses the tar files
-# you can also get gunzip from prep.ai.mit.edu
-% gunzip *
-
-# where the executables are to go, usually /usr/local
-% setenv gccLocal /usr/local 	
-
-# de-tar the files
-% tar -xf gas-2.1.1.tar
-% tar -xf binutils-2.2.1.tar
-% tar -xf gcc-2.4.5.tar
-% mkdir tar
-% mv *.tar tar
-
-# build gas and binutils first
-% cd gas* 
-
-% ./configure --host=sparc-sun-sunos4.1.3 --target=decstation-ultrix 
-	--prefix $gccLocal
-
-% make
-
-% make install
-
-% cd ../bin* 
-
-% ./configure --host=sparc-sun-sunos4.1.3 --target=decstation-ultrix 
-	--prefix $gccLocal
-
-% make
-
-% make install
-
-% cd ../gcc*
-
-% ./configure --host=sparc-sun-sunos4.1.3 --target=decstation-ultrix
-	--with-gnu-as --with-gnu-ld --prefix $gccLocal
-   	--local-prefix $gccLocal
-
-# Afer building the cross-compiler, the Makefile is going to try to
-# use it to build a set of libraries, and a couple test cases.
-# Unfortunately, the libraries depend on UNIX headers (such as stdio.h).
-#
-# Since Nachos user programs don't need these headers (they'd be
-# wrong anyway, since Nachos doesn't support the standard UNIX syscall
-# interface), we need to fake out the Makefile.
-
-# create a dummy lib files, to keep make happy 
-% ar r libgcc.a /dev/null
-% ar r libgcc2.a /dev/null
-
-# Delete the following lines from the Makefile
-#     ENQUIRE = enquire
-#     CROSS_TEST = cross-test
-% vi Makefile
-
-% make LANGUAGES=c
-
-# at this point you may get an error building libgcc2; ignore it and proceed.
-
-% make install LANGUAGES=c
-
-# at this point, the cross-compiler and subsidiary tools
-# are now installed, in $gccLocal/decstation-ultrix/bin
-
-# one last thing --
-#   you need to edit nachos/code/test/Makefile to use the
-#   gcc cross-compilation tools you have just built, instead of using 
-#   normal gcc.
+## 北京大学软件与微电子学院操作系统高级课程Nachos实验
+
+​                                             🥢***如果对您有帮助，请给一个star，感激不尽*🥢**
+
+### **各<u>实验内容</u>与<u>代码分支</u>的对应关系：**
+
+- [Lab1线程机制](./实验内容/Lab1线程机制)——[lab1](https://github.com/wuhao9714/myNachos3.4/tree/lab1)
+- [Lab2线程调度](./实验内容/Lab2线程调度)：
+  - 基于优先级的抢占式调度算法——[lab2-priority](https://github.com/wuhao9714/myNachos3.4/tree/lab2-priority)
+  - 时间片轮转算法——[lab2-RR](https://github.com/wuhao9714/myNachos3.4/tree/lab2-RR)
+  - 多级队列反馈调度算法——[lab2-MLFQ](https://github.com/wuhao9714/myNachos3.4/tree/lab2-MLFQ)
+- [Lab3同步机制](./实验内容/Lab3同步机制)——[lab3](https://github.com/wuhao9714/myNachos3.4/tree/lab3)
+- [Lab4虚拟内存](./实验内容/Lab4虚拟内存)——[lab4](https://github.com/wuhao9714/myNachos3.4/tree/lab4)
+- [Lab5文件系统](./实验内容/Lab5文件系统)——[lab5](https://github.com/wuhao9714/myNachos3.4/tree/lab5)
+- [Lab6系统调用](./实验内容/Lab6系统调用)——[lab6](https://github.com/wuhao9714/myNachos3.4/tree/lab6)
+- [Lab7通信死锁](./实验内容/Lab7通信死锁)：
+  - 通信——[lab7-communication](https://github.com/wuhao9714/myNachos3.4/tree/lab7-communication)
+  - 死锁——[lab7-deadlock](https://github.com/wuhao9714/myNachos3.4/tree/lab7-deadlock)
+
+
+
+------
+
+### **实验报告：**
+
+- [Lab1线程机制](./实验报告/Lab1线程机制)
+- [Lab2线程调度](./实验报告/Lab2线程调度)
+- [Lab3同步机制](./实验报告/Lab3同步机制)
+- [Lab4虚拟内存](./实验报告/Lab4虚拟内存)
+- [Lab5文件系统](./实验报告/Lab5文件系统)
+- [Lab6系统调用](./实验报告/Lab6系统调用)
+- [Lab7通信死锁](./实验报告/Lab7通信死锁)
+
+> 网络上其它可供参考的实验报告：
+>
+> - Lab1线程机制
+>   - https://blog.csdn.net/wyxpku/article/details/52076236
+>   - http://blog.sina.com.cn/s/blog_b9aae6030101mkoa.html
+>   - https://blog.csdn.net/superli90/article/details/29369909
+>   - https://www.cnblogs.com/icoty23/p/10870568.html
+> - Lab2线程调度
+>   - https://www.docin.com/p-219256450.html?docfrom=rrela
+>   - https://blog.csdn.net/wyxpku/article/details/52076206
+>   - https://blog.csdn.net/superli90/article/details/29373593
+> - Lab3同步机制
+>   - https://blog.csdn.net/wyxpku/article/details/52076209
+>   - https://blog.csdn.net/superli90/article/details/29376171
+>   - https://icoty.github.io/2019/05/14/nachos-3-4-Lab3/
+>   - https://www.docin.com/p-1156828984.html
+> - Lab4虚拟内存
+>   - https://wenku.baidu.com/view/be56dfe2541810a6f524ccbff121dd36a32dc430
+>   - http://blog.sina.com.cn/s/blog_4ae8f77f01018n6r.html
+>   - http://blog.sina.com.cn/s/blog_4ae8f77f01018n63.html
+>   - https://www.docin.com/p-213029843.html?docfrom=rrela
+> - Lab5文件系统
+>   - https://wenku.baidu.com/view/04382358f6ec4afe04a1b0717fd5360cbb1a8d40
+>   - http://blog.sina.com.cn/s/blog_b9aae6030101mkoe.html
+> - Lab6系统调用
+>   - https://wenku.baidu.com/view/bd03f40ee97101f69e3143323968011ca300f71e
+> - Lab7通信死锁
+>   - https://wenku.baidu.com/view/b4c693d1d05abe23482fb4daa58da0116c171f1e
+
+
+
+------
+
+### **Nachos3.4问题与答案：**
+
+<u>** **所有问题由陈向群老师提供**</u>
+
+<u>** **所有答案由北京大学软件与微电子学院2019-2020秋季学期《操作系统高级课程》全体同学贡献**</u>
+
+<u>** **在此仅做适当整理**</u>
+
+
+
+1. 新增源代码文件，如何修改makefile
+2. 线程管理对应的代码在哪里，Nachos的PCB中管理了哪些信息
+3.  nachos线程有几个状态，如何转换？
+4. 线程fork的时候，指定了线程要执行的函数，线程在执行这些函数之前做了
+5. Thread::Fork 方法中 scheduler->ReadyToRun，前后两行代码有什么作用
+6. ThreadRoot()什么时候启动？
+7. Nachos中如何销毁线程
+8. 线程销毁的方式是否有问题
+9. 线程切换时机是什么？线程切换时都做了哪些工作
+10. thread.h中Thread类的stacktop和machinestate为什么位置不能换？
+11. system.cc中的TimerInterruptHandler函数作用，为什么调用YieldOnReturn()?
+12. machine目录下的timer类有什么作用
+13. oneTick函数的做了什么？何时调用？
+14. nachos的时钟什么时候会前进，如何前进
+15. 除了oneTick函数，还有哪个函数修改了stats的ticks？
+16. Nachos系统时如何维护线程时间片的？
+17. 说清时钟中断的步骤
+18. 信号量P操作中有一个while(value==0) 的判断，能否替换为 if(value==0)，原因是?
+19. 会不会在Queue中Append多个相同线程
+20. Nachos如何保证同步操作的原子性，操作的优缺点。
+21. 对信号量p操作关中断后，中断何时会打开？
+22. 如何创建user address space？
+23. 如何运行user address space中的指令
+24. Machine::Run()直到用户线程结束后
+25. nachos中什么时候会发生exception？nachos中是如何接收到exception并处理的？
+26. 运行用户程序test/sort.c文件到在TLB中
+27. 不同的线程, 相同的VPN, 他们的物理页面相同吗?
+28. 用户程序不以exit和halt结束会如何
+29. 读懂openfile.cc中的ReadAt方法。
+30. 文件系统文件内容存放的sector的如何得到的
+31. nachos的目录是如何组织的
+32. 文件系统初始化的过程
+33. create文件的过程
+34. remove一个文件的过程
+35. nachos系统同步磁盘是怎样实现的？为什么要有这样的同步磁盘机制？如
+36. machine类中如何处理syscall
+37. 如何获得传递给系统调用的参数？系统调用的返回值是如何传递给调用者
+38. 完成系统调用之后如何修改PC值
+
+[<u>*查看答案*</u>](./Nachos问题与答案)
+
+
+
+[友情链接]: https://github.com/wsxst/MyNachos4.1	"朋友的Nachos4.1学习笔记"
+
