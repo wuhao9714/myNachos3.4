@@ -4,16 +4,16 @@
 
 ### **各<u>实验内容</u>与<u>代码分支</u>的对应关系：**
 
-- [Lab1线程机制](./实验内容/Lab1线程机制)——[lab1](https://github.com/wuhao9714/myNachos3.4/tree/lab1)
-- [Lab2线程调度](./实验内容/Lab2线程调度)：
+- [Lab1线程机制](./实验内容/Lab1线程机制.md)——[lab1](https://github.com/wuhao9714/myNachos3.4/tree/lab1)
+- [Lab2线程调度](./实验内容/Lab2线程调度.md)：
   - 基于优先级的抢占式调度算法——[lab2-priority](https://github.com/wuhao9714/myNachos3.4/tree/lab2-priority)
   - 时间片轮转算法——[lab2-RR](https://github.com/wuhao9714/myNachos3.4/tree/lab2-RR)
   - 多级队列反馈调度算法——[lab2-MLFQ](https://github.com/wuhao9714/myNachos3.4/tree/lab2-MLFQ)
-- [Lab3同步机制](./实验内容/Lab3同步机制)——[lab3](https://github.com/wuhao9714/myNachos3.4/tree/lab3)
-- [Lab4虚拟内存](./实验内容/Lab4虚拟内存)——[lab4](https://github.com/wuhao9714/myNachos3.4/tree/lab4)
-- [Lab5文件系统](./实验内容/Lab5文件系统)——[lab5](https://github.com/wuhao9714/myNachos3.4/tree/lab5)
-- [Lab6系统调用](./实验内容/Lab6系统调用)——[lab6](https://github.com/wuhao9714/myNachos3.4/tree/lab6)
-- [Lab7通信死锁](./实验内容/Lab7通信死锁)：
+- [Lab3同步机制](./实验内容/Lab3同步机制.md)——[lab3](https://github.com/wuhao9714/myNachos3.4/tree/lab3)
+- [Lab4虚拟内存](./实验内容/Lab4虚拟内存.md)——[lab4](https://github.com/wuhao9714/myNachos3.4/tree/lab4)
+- [Lab5文件系统](./实验内容/Lab5文件系统.md)——[lab5](https://github.com/wuhao9714/myNachos3.4/tree/lab5)
+- [Lab6系统调用](./实验内容/Lab6系统调用.md)——[lab6](https://github.com/wuhao9714/myNachos3.4/tree/lab6)
+- [Lab7通信死锁](./实验内容/Lab7通信死锁.md)：
   - 通信——[lab7-communication](https://github.com/wuhao9714/myNachos3.4/tree/lab7-communication)
   - 死锁——[lab7-deadlock](https://github.com/wuhao9714/myNachos3.4/tree/lab7-deadlock)
 
@@ -23,13 +23,13 @@
 
 ### **实验报告：**
 
-- [Lab1线程机制](./实验报告/Lab1线程机制)
-- [Lab2线程调度](./实验报告/Lab2线程调度)
-- [Lab3同步机制](./实验报告/Lab3同步机制)
-- [Lab4虚拟内存](./实验报告/Lab4虚拟内存)
-- [Lab5文件系统](./实验报告/Lab5文件系统)
-- [Lab6系统调用](./实验报告/Lab6系统调用)
-- [Lab7通信死锁](./实验报告/Lab7通信死锁)
+- [Lab1线程机制](./实验报告/Lab1线程机制.md)
+- [Lab2线程调度](./实验报告/Lab2线程调度.md)
+- [Lab3同步机制](./实验报告/Lab3同步机制.md)
+- [Lab4虚拟内存](./实验报告/Lab4虚拟内存.md)
+- [Lab5文件系统](./实验报告/Lab5文件系统.md)
+- [Lab6系统调用](./实验报告/Lab6系统调用.md)
+- [Lab7通信死锁](./实验报告/Lab7通信死锁.md)
 
 > 网络上其它可供参考的实验报告：
 >
@@ -73,6 +73,7 @@
 <u>** **在此仅做适当整理**</u>
 
 
+[<u>*查看答案*</u>](./Nachos问题与答案)
 
 1. 新增源代码文件，如何修改makefile
 2. 线程管理对应的代码在哪里，Nachos的PCB中管理了哪些信息
@@ -113,7 +114,7 @@
 37. 如何获得传递给系统调用的参数？系统调用的返回值是如何传递给调用者
 38. 完成系统调用之后如何修改PC值
 
-[<u>*查看答案*</u>](./Nachos问题与答案)
+
 
 
 
